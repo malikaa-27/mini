@@ -1,18 +1,28 @@
-![smallest.ai](smallestbanner.webp)
-
 # MiniFlow
 
-Voice-to-text dictation and command assistant for macOS. Hold Fn to speak and MiniFlow types at your cursor.
+![smallest.ai](smallestbanner.webp)
 
-[![platform](https://img.shields.io/badge/platform-macOS-lightgrey)](https://www.apple.com/macos/)
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+<p align="center">
+  Voice-to-text dictation and command assistant for macOS.
+</p>
+<p align="center">
+  Hold Fn to speak and MiniFlow types at your cursor using the fastest and most accurate speech-to-text model in the world.
+</p>
+
+<p align="center">
+  <a href="https://www.apple.com/macos/">
+    <img src="https://img.shields.io/badge/platform-macOS-lightgrey" alt="platform">
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license">
+  </a>
+</p>
+
 
 ## Features
 
 - Global Fn hold-to-talk for instant dictation
 - Automatic typing at your cursor with no copy/paste steps
-- Command mode for rewrite, summary, bullets, grammar fixes, and quick email drafts
-- Local-first app with a bundled Python engine
 - Clean MVP build (no external integrations)
 
 ## Prerequisites
@@ -37,16 +47,8 @@ Keys are stored locally in `~/miniflow/miniflow_keys.json`.
 
 ## Usage
 
-- Hold Fn to start listening
-- Release Fn to stop and process
-- Type a command in the command bar to run a text command
-
-Example commands:
-
-- "Summarize this"
-- "Rewrite this more professionally"
-- "Fix grammar"
-- "Draft a quick follow up email"
+- Hold Fn to start speaking
+- Release Fn to stop 
 
 ## Building from source
 
