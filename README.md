@@ -1,3 +1,5 @@
+![smallest.ai](smallestbanner.webp)
+
 # MiniFlow
 
 Voice-to-text dictation and command assistant for macOS. Hold Fn to speak and MiniFlow types at your cursor.
