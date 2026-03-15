@@ -2,7 +2,7 @@
 	<img src="smallestbanner.webp" alt="smallest.ai" />
 </p>
 
-# MiniFlow
+# <p align="center"> MiniFlow </p>
 
 <p align="center">
 	Voice-to-text dictation and command assistant for macOS.
@@ -80,17 +80,28 @@ Output: `build/MiniFlow-0.2.0.dmg`
 ## Project structure
 
 ```
-MiniflowApp/       # Swift/SwiftUI macOS app
-miniflow-engine/   # Python FastAPI engine
-miniflow-auth/     # OAuth helpers (disabled in MVP)
+MiniflowApp/            # Swift/SwiftUI macOS app
+	MiniflowApp/          # App source, views, and view models
+	Bridge/               # Swift networking helpers (API + event stream)
+	Models/               # Action + history models
+	Views/                # UI screens and components
+miniflow-engine/        # Python FastAPI engine
+	connectors/           # Service connectors (disabled in MVP)
+	agent.py              # Intent + command execution
+	main.py               # API server and request routing
+miniflow-auth/          # OAuth helpers (disabled in MVP)
+build_*.sh              # Build scripts for backend/app/DMG
 ```
 
 ## Contributing
 
+We love contributions that keep MiniFlow fast, simple, and reliable.
+
 1. Fork the repository.
-2. Create a feature branch.
-3. Commit your changes.
-4. Open a pull request.
+2. Create a feature branch: `git checkout -b feature/short-description`
+3. Commit your changes: `git commit -m "Add short description"`
+4. Push the branch: `git push origin feature/short-description`
+5. Open a pull request with a short summary and screenshots if UI changes.
 
 ### Development guidelines
 
