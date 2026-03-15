@@ -1,98 +1,50 @@
 # MiniFlow
 
-macOS menu-bar voice assistant. Hold **Fn** to speak — MiniFlow transcribes, understands, and acts.
+Voice-to-text dictation and command assistant for macOS. Hold Fn to speak and MiniFlow types at your cursor.
 
----
+[![platform](https://img.shields.io/badge/platform-macOS-lightgrey)](https://www.apple.com/macos/)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## What it does
+## Features
 
-- **Voice commands** — "Send a Slack message to John saying I'll be late" → done
-- **Dictation** — hold Fn anywhere, speak, release — text is typed at your cursor
-- **App integrations** — None (MVP)
-- **Always available** — lives in your menu bar, no window to manage
-
----
+- Global Fn hold-to-talk for instant dictation
+- Automatic typing at your cursor with no copy/paste steps
+- Command mode for rewrite, summary, bullets, grammar fixes, and quick email drafts
+- Local-first app with a bundled Python engine
+- Clean MVP build (no external integrations)
 
 ## Prerequisites
 
-| Requirement | Minimum |
-|-------------|---------|
-| macOS | Ventura 13.0 or later |
-| Architecture | Apple Silicon (arm64) |
-| API Keys | Smallest AI (required) |
+- macOS Ventura 13.0 or later
+- Apple Silicon (arm64)
+- Smallest AI API key
 
----
+## Quick start
 
-## Installation
-
-### 1. Install MiniFlow
-
-1. Open the DMG and drag **MiniFlow.app** into the **Applications** folder
-2. Open **Terminal** (search "Terminal" in Spotlight)
-3. Paste this command and press Enter:
+1. Download the latest DMG and drag MiniFlow.app to Applications.
+2. Clear Gatekeeper and launch:
 
 ```bash
 xattr -cr /Applications/MiniFlow.app && open /Applications/MiniFlow.app
 ```
 
-This clears the macOS security flag and launches MiniFlow. You only need to do this once.
+3. Grant Microphone and Accessibility permissions when prompted.
+4. Open Settings and add your Smallest AI API key.
 
-### 2. Grant permissions
-
-On first launch, macOS will ask for:
-
-- **Microphone** — required for voice input
-- **Accessibility** — required for typing text into other apps
-
-If you accidentally deny either, re-enable in:
-**System Settings → Privacy & Security → Microphone / Accessibility**
-
-### 3. Add your API keys
-
-On first launch, wait **~10 seconds** for the engine to start (it decompresses in the background on first run). Then open **Settings → Keys** and enter:
-
-| Key | Where to get it |
-|-----|----------------|
-| Smallest AI API Key | [waves.smallest.ai](https://waves.smallest.ai) → Dashboard |
-
-Keys are stored locally in `~/miniflow/miniflow_keys.json` and never leave your machine except to call the respective APIs.
-
----
+Keys are stored locally in `~/miniflow/miniflow_keys.json`.
 
 ## Usage
 
-| Action | Result |
-|--------|--------|
-| **Hold Fn** | Start listening |
-| **Release Fn** | Stop — command is processed |
-| **Type in command bar** | Run a text command manually |
-| **Click menu bar icon** | Open / close the window |
+- Hold Fn to start listening
+- Release Fn to stop and process
+- Type a command in the command bar to run a text command
 
-### Example commands
+Example commands:
 
-- "Open Slack"
 - "Summarize this"
 - "Rewrite this more professionally"
 - "Fix grammar"
-- "Write a quick follow up email saying I'll send the deck tomorrow"
-
----
-
-## Connecting integrations
-
-Connectors are disabled in the MVP build.
-
----
-
-## What's in the .app bundle
-
-The app is fully self-contained — no Python, no Xcode, nothing to install.
-
-- Swift/SwiftUI menu-bar app
-- Bundled Python backend (FastAPI, runs on `localhost:8765`)
-- All connectors and agent logic included
-
----
+- "Draft a quick follow up email"
 
 ## Building from source
 
@@ -110,25 +62,26 @@ cd miniflow-engine && pip install -r requirements.txt && cd ..
 
 Output: `build/MiniFlow-0.2.0.dmg`
 
-Apps built locally bypass Gatekeeper — no `xattr` step needed.
+## Project structure
 
----
+```
+MiniflowApp/       # Swift/SwiftUI macOS app
+miniflow-engine/   # Python FastAPI engine
+miniflow-auth/     # OAuth helpers (disabled in MVP)
+```
 
 ## Troubleshooting
 
-**App doesn't respond to Fn key**
-→ Check Accessibility permission in System Settings → Privacy & Security.
+- Fn key not working: enable Accessibility in System Settings.
+- No transcription: check Microphone permission and API key.
+- Engine failed to start: wait a few seconds after first launch and retry.
 
-**Transcription never starts**
-→ Check Microphone permission. Verify your Smallest AI API key is set in Settings → Keys.
+Logs:
 
-**"Engine failed to start" on first launch**
-→ Wait a few seconds and try again — the engine decompresses on first run.
-
-**Commands don't execute**
-→ Verify your OpenAI API key is valid and has available credits.
-
-**Check logs**
 ```bash
 tail -f ~/miniflow/miniflow.log
 ```
+
+## License
+
+MIT. See LICENSE.
