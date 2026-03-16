@@ -16,7 +16,7 @@ struct SettingsView: View {
                 .tag("profile")
 
             if #available(macOS 13, *) {
-                GeneralTab()
+                GeneralTab(vm: vm)
                     .tabItem { Label("General", systemImage: "gearshape") }
                     .tag("general")
             }
@@ -117,6 +117,9 @@ private struct ProfileTab: View {
 
 @available(macOS 13, *)
 private struct GeneralTab: View {
+    @ObservedObject var vm: SettingsViewModel
+    @State private var newFillerWord = ""
+    @State private var newWakeVariant = ""
 
     var body: some View {
         Form {
@@ -135,6 +138,103 @@ private struct GeneralTab: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } header: { Text("Startup") }
+
+            Section {
+                Toggle("Remove Filler Words", isOn: $vm.removeFillerWords)
+                    .onChange(of: vm.removeFillerWords) { enabled in
+                        Task { await vm.saveRemoveFillerWords(enabled) }
+                    }
+                Text("When enabled, MiniFlow will remove filler words")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                Divider().padding(.vertical, 6)
+
+                Toggle("Miniflow Commands", isOn: $vm.miniflowCommandsEnabled)
+                    .onChange(of: vm.miniflowCommandsEnabled) { enabled in
+                        Task { await vm.saveMiniflowCommandsEnabled(enabled) }
+                    }
+                Text("Enable voice commands like \"hey miniflow, open Safari\".")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                HStack(spacing: 8) {
+                    TextField("Wake phrase", text: $vm.miniflowWakePhrase)
+                        .textFieldStyle(.roundedBorder)
+                        .onSubmit {
+                            Task { await vm.saveMiniflowWakePhrase(vm.miniflowWakePhrase) }
+                        }
+                    Button("Save") {
+                        Task { await vm.saveMiniflowWakePhrase(vm.miniflowWakePhrase) }
+                    }
+                }
+
+                HStack(spacing: 8) {
+                    TextField("Add wake phrase variant", text: $newWakeVariant)
+                        .textFieldStyle(.roundedBorder)
+                    Button("Add") {
+                        let phrase = newWakeVariant
+                        newWakeVariant = ""
+                        Task { await vm.addMiniflowWakeVariant(phrase) }
+                    }
+                    .disabled(newWakeVariant.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+
+                if !vm.miniflowWakeVariants.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(vm.miniflowWakeVariants.sorted(), id: \.self) { phrase in
+                            HStack {
+                                Text(phrase)
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                Button {
+                                    Task { await vm.removeMiniflowWakeVariant(phrase) }
+                                } label: {
+                                    Image(systemName: "trash")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(.red)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+                    .padding(.top, 4)
+                }
+
+                HStack(spacing: 8) {
+                    TextField("Add a filler word", text: $newFillerWord)
+                        .textFieldStyle(.roundedBorder)
+                    Button("Add") {
+                        let word = newFillerWord
+                        newFillerWord = ""
+                        Task { await vm.addCustomFillerWord(word) }
+                    }
+                    .disabled(newFillerWord.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+
+                if !vm.customFillerWords.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(vm.customFillerWords.sorted(), id: \.self) { word in
+                            HStack {
+                                Text(word)
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                Button {
+                                    Task { await vm.removeCustomFillerWord(word) }
+                                } label: {
+                                    Image(systemName: "trash")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(.red)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+                    .padding(.top, 4)
+                }
+            } header: { Text("Dictation") }
 
             Section {
                 HStack {

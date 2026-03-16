@@ -30,14 +30,8 @@ struct MainWindowView: View {
             .clipShape(RoundedRectangle(cornerRadius: 20))
             .padding(12)
 
-            // Right action feed (slides in when actions exist)
-            if !vm.actions.isEmpty || vm.isProcessing {
-                ActionFeedPanel(vm: vm)
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
-            }
         }
-        .frame(width: 860, height: 600)
+        .frame(width: 1200, height: 800)
         .background(Color.bgWarm)
-        .animation(.easeInOut(duration: 0.2), value: vm.actions.isEmpty && !vm.isProcessing)
     }
 }

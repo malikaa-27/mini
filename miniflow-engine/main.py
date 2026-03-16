@@ -14,6 +14,7 @@ import base64
 import json
 import logging
 import os
+import re
 from contextlib import asynccontextmanager
 from typing import Any
 
@@ -173,7 +174,25 @@ async def _transcribe_audio(b: dict):
         agent.set_target_app(bundle_id)
     wav_bytes = base64.b64decode(b["audio"])
     transcript = await audio.transcribe(wav_bytes)
+    settings = config.get_advanced_settings()
+    if settings.get("filler_removal"):
+        transcript = _remove_filler_words(transcript, config.get_all_filler_words())
     return {"transcript": transcript}
+
+
+def _remove_filler_words(text: str, words: list[str]) -> str:
+    if not text or not words:
+        return text
+    candidates = [w.strip().lower() for w in words if isinstance(w, str) and w.strip()]
+    if not candidates:
+        return text
+    # Longer phrases first so we don't partially match them.
+    candidates = sorted(set(candidates), key=len, reverse=True)
+    pattern = r"\\b(?:%s)\\b" % "|".join(re.escape(w) for w in candidates)
+    cleaned = re.sub(pattern, "", text, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\s+([,.;:!?])", r"\1", cleaned)
+    cleaned = re.sub(r"\s{2,}", " ", cleaned).strip()
+    return cleaned
 
 
 @app.post("/invoke/{command}")
@@ -193,6 +212,12 @@ async def invoke(command: str, body: dict = {}):
         "save_advanced_setting": lambda b: config.save_advanced_setting(b["key"], b["value"]),
         "save_user_name":        lambda b: config.save_user_name(b["name"]),
         "get_user_name":         lambda b: config.get_user_name(),
+        "save_miniflow_commands": lambda b: config.save_miniflow_commands(b.get("enabled", True)),
+        "save_miniflow_wake_phrase": lambda b: config.save_miniflow_wake_phrase(b.get("phrase", "")),
+        "get_miniflow_wake_variants": lambda b: config.get_miniflow_wake_variants(),
+        "save_miniflow_wake_variants": lambda b: config.save_miniflow_wake_variants(b.get("variants", [])),
+        "get_filler_words":      lambda b: config.get_filler_words(),
+        "save_filler_words":     lambda b: config.save_filler_words(b.get("words", [])),
         # Dictation
         "start_dictation":       lambda b: dictation.start_dictation(),
         "stop_dictation":        lambda b: dictation.stop_dictation(),

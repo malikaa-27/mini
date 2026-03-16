@@ -8,6 +8,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
 import subprocess
 from datetime import datetime
 from typing import Callable, Any
@@ -239,10 +240,60 @@ def _inject_file_context(text: str) -> str:
     return text
 
 
+# ── Miniflow commands ──
+
+def _normalize_phrase(text: str) -> str:
+    lowered = re.sub(r"[^a-z0-9\s]", " ", text.lower())
+    return re.sub(r"\s+", " ", lowered).strip()
+
+
+def _wake_phrase_variants(phrase: str, extra: list[str]) -> list[str]:
+    variants = []
+    base = _normalize_phrase(phrase)
+    if base:
+        variants.append(base)
+    for v in extra:
+        cleaned = _normalize_phrase(v)
+        if cleaned and cleaned not in variants:
+            variants.append(cleaned)
+    return sorted(variants, key=len, reverse=True)
+
+
+def _match_miniflow_open(text: str, wake_phrase: str, variants: list[str]) -> str | None:
+    variants = _wake_phrase_variants(wake_phrase, variants)
+    if not variants:
+        return None
+    patterns = []
+    for v in variants:
+        token_pattern = r"\\s+".join(re.escape(tok) for tok in v.split())
+        patterns.append(token_pattern)
+    prefix = r"(?:%s)" % "|".join(patterns)
+    pattern = re.compile(rf"^\\s*{prefix}\\s*[,]*\\s*open\\s+(?P<app>.+)$", re.IGNORECASE)
+    match = pattern.match(text)
+    if not match:
+        return None
+    app = match.group("app").strip().strip("\"'")
+    app = re.sub(r"\s+$", "", app)
+    return app or None
+
+
 # ── Main agent loop ──
 
 async def execute_command(text: str) -> list[dict]:
     await _emit("agent-status", "processing")
+
+    settings = config.get_advanced_settings()
+    if settings.get("miniflow_commands", True):
+        wake_phrase = settings.get("miniflow_wake_phrase") or ""
+        variants = settings.get("miniflow_wake_variants") or []
+        app_name = _match_miniflow_open(text, wake_phrase, variants)
+        if app_name:
+            success, result_msg = _execute_local("open_application", {"name": app_name})
+            result = [{"action": "open_application", "success": success, "message": result_msg}]
+            await _emit("action-result", result[0])
+            history.append_entry(transcript=text, entry_type="command", actions=result, success=success)
+            await _emit("agent-status", "idle")
+            return result
 
     try:
         openai_key = config.get_openai_key()
