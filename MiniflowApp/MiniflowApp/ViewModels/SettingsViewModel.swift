@@ -11,6 +11,7 @@ final class SettingsViewModel: ObservableObject {
     @Published var saveStatus: String?
     @Published var removeFillerWords = true
     @Published var customFillerWords: [String] = []
+    @Published var fillerWordsCsv = ""
     @Published var miniflowCommandsEnabled = true
     @Published var miniflowWakePhrase = "hey miniflow"
     @Published var miniflowWakeVariants: [String] = []
@@ -38,6 +39,7 @@ final class SettingsViewModel: ObservableObject {
         }
         if let words: [String] = try? await api.invoke("get_filler_words") {
             customFillerWords = words
+            fillerWordsCsv = words.joined(separator: ", ")
         }
     }
 
@@ -99,24 +101,14 @@ final class SettingsViewModel: ObservableObject {
         try? await api.invokeVoid("save_advanced_setting", body: ["key": "filler_removal", "value": enabled])
     }
 
-    func addCustomFillerWord(_ word: String) async {
-        let cleaned = word.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !cleaned.isEmpty else { return }
-        var updated = customFillerWords.map { $0.lowercased() }
-        if updated.contains(cleaned) { return }
-        updated.append(cleaned)
-        await saveCustomFillerWords(updated)
-    }
-
-    func removeCustomFillerWord(_ word: String) async {
-        let cleaned = word.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        let updated = customFillerWords.filter { $0.lowercased() != cleaned }
-        await saveCustomFillerWords(updated)
-    }
-
-    private func saveCustomFillerWords(_ words: [String]) async {
-        customFillerWords = words
-        try? await api.invokeVoid("save_filler_words", body: ["words": words])
+    func saveFillerWordsCsv(_ csv: String) async {
+        let parsed = csv
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
+            .filter { !$0.isEmpty }
+        customFillerWords = parsed
+        fillerWordsCsv = parsed.joined(separator: ", ")
+        try? await api.invokeVoid("save_filler_words", body: ["words": parsed])
     }
 
     // MARK: - Helpers

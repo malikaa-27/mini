@@ -118,7 +118,6 @@ private struct ProfileTab: View {
 @available(macOS 13, *)
 private struct GeneralTab: View {
     @ObservedObject var vm: SettingsViewModel
-    @State private var newFillerWord = ""
     @State private var newWakeVariant = ""
 
     var body: some View {
@@ -159,7 +158,7 @@ private struct GeneralTab: View {
                     .foregroundStyle(.secondary)
 
                 HStack(spacing: 8) {
-                    TextField("Wake phrase", text: $vm.miniflowWakePhrase)
+                    TextField("Command phrase", text: $vm.miniflowWakePhrase)
                         .textFieldStyle(.roundedBorder)
                         .onSubmit {
                             Task { await vm.saveMiniflowWakePhrase(vm.miniflowWakePhrase) }
@@ -202,37 +201,19 @@ private struct GeneralTab: View {
                     .padding(.top, 4)
                 }
 
-                HStack(spacing: 8) {
-                    TextField("Add a filler word", text: $newFillerWord)
-                        .textFieldStyle(.roundedBorder)
-                    Button("Add") {
-                        let word = newFillerWord
-                        newFillerWord = ""
-                        Task { await vm.addCustomFillerWord(word) }
-                    }
-                    .disabled(newFillerWord.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
+                Text("Filler words are ignored in the transcript. Enter comma-separated values.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
 
-                if !vm.customFillerWords.isEmpty {
-                    VStack(alignment: .leading, spacing: 6) {
-                        ForEach(vm.customFillerWords.sorted(), id: \.self) { word in
-                            HStack {
-                                Text(word)
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(.secondary)
-                                Spacer()
-                                Button {
-                                    Task { await vm.removeCustomFillerWord(word) }
-                                } label: {
-                                    Image(systemName: "trash")
-                                        .font(.system(size: 12))
-                                        .foregroundStyle(.red)
-                                }
-                                .buttonStyle(.plain)
-                            }
+                HStack(spacing: 8) {
+                    TextField("Filler words (comma-separated)", text: $vm.fillerWordsCsv)
+                        .textFieldStyle(.roundedBorder)
+                        .onSubmit {
+                            Task { await vm.saveFillerWordsCsv(vm.fillerWordsCsv) }
                         }
+                    Button("Save") {
+                        Task { await vm.saveFillerWordsCsv(vm.fillerWordsCsv) }
                     }
-                    .padding(.top, 4)
                 }
             } header: { Text("Dictation") }
 

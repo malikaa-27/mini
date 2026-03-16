@@ -192,6 +192,10 @@ def _remove_filler_words(text: str, words: list[str]) -> str:
     cleaned = re.sub(pattern, "", text, flags=re.IGNORECASE)
     cleaned = re.sub(r"\s+([,.;:!?])", r"\1", cleaned)
     cleaned = re.sub(r"\s{2,}", " ", cleaned).strip()
+    cleaned = re.sub(r"^\s*,\s*", "", cleaned)
+    cleaned = re.sub(r",\s*,+", ",", cleaned)
+    cleaned = re.sub(r",\s*(?=[.?!]|$)", "", cleaned)
+    cleaned = re.sub(r",\s*(\S)", r", \1", cleaned)
     return cleaned
 
 

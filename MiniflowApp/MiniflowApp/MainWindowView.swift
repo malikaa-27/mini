@@ -27,9 +27,6 @@ struct MainWindowView: View {
                     }
                 }
             }
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .padding(12)
-
         }
         .frame(width: 1200, height: 800)
         .background(Color.bgWarm)

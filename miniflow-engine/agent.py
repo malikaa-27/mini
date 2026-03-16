@@ -263,13 +263,16 @@ def _match_miniflow_open(text: str, wake_phrase: str, variants: list[str]) -> st
     variants = _wake_phrase_variants(wake_phrase, variants)
     if not variants:
         return None
+    normalized = _normalize_phrase(text)
+    if not normalized:
+        return None
     patterns = []
     for v in variants:
         token_pattern = r"\\s+".join(re.escape(tok) for tok in v.split())
         patterns.append(token_pattern)
     prefix = r"(?:%s)" % "|".join(patterns)
-    pattern = re.compile(rf"^\\s*{prefix}\\s*[,]*\\s*open\\s+(?P<app>.+)$", re.IGNORECASE)
-    match = pattern.match(text)
+    pattern = re.compile(rf"^\\s*{prefix}\\s+open\\s+(?P<app>.+)$", re.IGNORECASE)
+    match = pattern.match(normalized)
     if not match:
         return None
     app = match.group("app").strip().strip("\"'")
