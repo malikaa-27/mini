@@ -59,7 +59,7 @@
 		BCF5F2B32F5FDBF000630702 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		BCF5F2B42F5FDBF000630702 /* SnippetsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetsTab.swift; sourceTree = "<group>"; };
 		BCF5F2BB2F5FDBFB00630702 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
-		BCF5F2BE2F5FDBFB00630702 /* GeistPixel-Square.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "GeistPixel-Square.ttf"; sourceTree = "<group>"; };
+		BCF5F2BE2F5FDBFB00630702 /* GeistPixel-Square.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "GeistPixel-Square.ttf"; path = "Fonts/GeistPixel-Square.ttf"; sourceTree = "<group>"; };
 		BCF5F2C02F5FDBFB00630702 /* PlaceholderTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderTab.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
