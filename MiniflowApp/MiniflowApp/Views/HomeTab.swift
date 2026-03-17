@@ -18,17 +18,8 @@ struct HomeTab: View {
 
                     Spacer()
 
-                    // Inline stats (no emojis)
-                    HStack(spacing: 0) {
-                        statPill(value: vm.totalWordsTranscribed == 0 ? "0" : "\(vm.totalWordsTranscribed)",
-                                 label: "words")
-                        Rectangle()
-                            .fill(Color(hex: "E5E5EA"))
-                            .frame(width: 1, height: 16)
-                            .padding(.horizontal, 12)
-                        statPill(value: vm.averageWpm == 0 ? "–" : "\(vm.averageWpm)",
-                                 label: "WPM")
-                    }
+                    statPill(value: vm.totalWordsTranscribed == 0 ? "0" : "\(vm.totalWordsTranscribed)",
+                             label: "words")
                 }
 
                 // Fn hint card

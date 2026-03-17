@@ -30,6 +30,9 @@ struct MainWindowView: View {
             .clipShape(RoundedRectangle(cornerRadius: 20))
             .padding(12)
         }
+        .onChange(of: selectedTab) { _, tab in
+            if tab == "home" { Task { await vm.loadUserName() } }
+        }
         .frame(width: 880, height: 600)
         .background(Color.bgWarm)
         .preferredColorScheme(.light)
