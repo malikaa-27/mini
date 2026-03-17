@@ -1,6 +1,7 @@
 """Dictionary — word replacement mappings."""
 
 import json
+import re
 from pathlib import Path
 
 DICT_FILE = Path.home() / "miniflow" / "dictionary.json"
@@ -44,5 +45,5 @@ def import_dictionary(entries: dict):
 
 def apply(text: str) -> str:
     for frm, to in _read().items():
-        text = text.replace(frm, to)
+        text = re.sub(re.escape(frm), to, text, flags=re.IGNORECASE)
     return text

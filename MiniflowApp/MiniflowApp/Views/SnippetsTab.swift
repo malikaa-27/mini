@@ -11,19 +11,19 @@ final class ShortcutsViewModel: ObservableObject {
     func load() async {
         isLoading = true
         defer { isLoading = false }
-        if let dict: [String: String] = try? await api.invoke("get_snippets") {
+        if let dict: [String: String] = try? await api.invoke("get_shortcuts") {
             entries = dict.map { (trigger: $0.key, expansion: $0.value) }
                          .sorted { $0.trigger < $1.trigger }
         }
     }
 
     func add(trigger: String, expansion: String) async {
-        try? await api.invokeVoid("add_snippet", body: ["trigger": trigger, "expansion": expansion])
+        try? await api.invokeVoid("add_shortcut", body: ["trigger": trigger, "expansion": expansion])
         await load()
     }
 
     func remove(trigger: String) async {
-        try? await api.invokeVoid("remove_snippet", body: ["trigger": trigger])
+        try? await api.invokeVoid("remove_shortcut", body: ["trigger": trigger])
         entries.removeAll { $0.trigger == trigger }
     }
 }
