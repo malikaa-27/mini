@@ -218,9 +218,14 @@ private struct AddShortcutSheet: View {
                         .foregroundStyle(Color.textMuted)
                     ZStack(alignment: .topLeading) {
                         if expansion.isEmpty {
-                            Text("john@example.com")
+                            let placeholder: AttributedString = {
+                                var s = AttributedString("e.g. john@example.com")
+                                s.foregroundColor = Color(hex: "BBBBBB")
+                                s.link = nil
+                                return s
+                            }()
+                            Text(placeholder)
                                 .font(.system(size: 13))
-                                .foregroundStyle(Color(hex: "BBBBBB"))
                                 .padding(.leading, 5)
                                 .padding(.top, 8)
                                 .allowsHitTesting(false)
