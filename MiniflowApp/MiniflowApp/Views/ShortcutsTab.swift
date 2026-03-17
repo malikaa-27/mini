@@ -184,6 +184,13 @@ private struct AddShortcutSheet: View {
         _expansion = State(initialValue: initialExpansion)
     }
 
+    private var expansionPlaceholder: AttributedString {
+        var s = AttributedString("e.g. john@example.com")
+        s.foregroundColor = Color(hex: "BBBBBB")
+        s.link = nil
+        return s
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
 
@@ -218,13 +225,7 @@ private struct AddShortcutSheet: View {
                         .foregroundStyle(Color.textMuted)
                     ZStack(alignment: .topLeading) {
                         if expansion.isEmpty {
-                            let placeholder: AttributedString = {
-                                var s = AttributedString("e.g. john@example.com")
-                                s.foregroundColor = Color(hex: "BBBBBB")
-                                s.link = nil
-                                return s
-                            }()
-                            Text(placeholder)
+                            Text(expansionPlaceholder)
                                 .font(.system(size: 13))
                                 .padding(.leading, 5)
                                 .padding(.top, 8)
