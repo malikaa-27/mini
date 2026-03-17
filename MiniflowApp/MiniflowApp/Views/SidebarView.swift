@@ -12,7 +12,7 @@ struct SidebarView: View {
                 Text("Miniflow ™")
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(Color.black)
-                Text("Turn your voice into polished text. Works in Slack, Gmail & any other site or app.")
+                Text("Turn your voice into polished text. Works in any site or app.")
                     .font(.system(size: 11))
                     .foregroundStyle(Color.textMuted)
                     .lineSpacing(2)
