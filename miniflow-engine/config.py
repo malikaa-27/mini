@@ -27,18 +27,11 @@ DEFAULT_FILLER_WORDS = [
 ]
 
 DEFAULT_SETTINGS = {
-    "language": "multi",
+    "language": "en",
     "whisper_mode": False,
     "developer_mode": False,
     "filler_removal": True,
     "custom_filler_words": [],
-    "miniflow_commands": True,
-    "miniflow_wake_phrase": "hey miniflow",
-    "miniflow_wake_variants": [
-        "hey mini flow",
-        "hey minnie flow",
-        "hey manniflow",
-    ],
     "user_name": None,
 }
 
@@ -108,9 +101,6 @@ def get_advanced_settings() -> dict:
         "whisper_mode": s["whisper_mode"],
         "developer_mode": s["developer_mode"],
         "filler_removal": s["filler_removal"],
-        "miniflow_commands": s["miniflow_commands"],
-        "miniflow_wake_phrase": s["miniflow_wake_phrase"],
-        "miniflow_wake_variants": s["miniflow_wake_variants"],
     }
 
 def save_advanced_setting(key: str, value: bool):
@@ -158,37 +148,3 @@ def get_all_filler_words() -> list[str]:
     return DEFAULT_FILLER_WORDS + get_filler_words()
 
 
-# ── Miniflow commands ──
-
-def save_miniflow_commands(enabled: bool):
-    s = _read_settings()
-    s["miniflow_commands"] = bool(enabled)
-    _write_settings(s)
-
-def save_miniflow_wake_phrase(phrase: str):
-    cleaned = phrase.strip()
-    if not cleaned:
-        cleaned = DEFAULT_SETTINGS["miniflow_wake_phrase"]
-    s = _read_settings()
-    s["miniflow_wake_phrase"] = cleaned
-    _write_settings(s)
-
-def get_miniflow_wake_variants() -> list[str]:
-    s = _read_settings()
-    variants = s.get("miniflow_wake_variants") or []
-    return [v for v in variants if isinstance(v, str)]
-
-def save_miniflow_wake_variants(variants: list[str]):
-    cleaned = []
-    seen = set()
-    for v in variants:
-        if not isinstance(v, str):
-            continue
-        t = v.strip().lower()
-        if not t or t in seen:
-            continue
-        seen.add(t)
-        cleaned.append(t)
-    s = _read_settings()
-    s["miniflow_wake_variants"] = cleaned
-    _write_settings(s)

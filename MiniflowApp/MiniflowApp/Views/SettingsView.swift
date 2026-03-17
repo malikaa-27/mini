@@ -118,7 +118,6 @@ private struct ProfileTab: View {
 @available(macOS 13, *)
 private struct GeneralTab: View {
     @ObservedObject var vm: SettingsViewModel
-    @State private var newWakeVariant = ""
 
     var body: some View {
         Form {
@@ -143,65 +142,7 @@ private struct GeneralTab: View {
                     .onChange(of: vm.removeFillerWords) { enabled in
                         Task { await vm.saveRemoveFillerWords(enabled) }
                     }
-                Text("When enabled, MiniFlow will remove filler words")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                Divider().padding(.vertical, 6)
-
-                Toggle("Miniflow Commands", isOn: $vm.miniflowCommandsEnabled)
-                    .onChange(of: vm.miniflowCommandsEnabled) { enabled in
-                        Task { await vm.saveMiniflowCommandsEnabled(enabled) }
-                    }
-                Text("Enable voice commands like \"hey miniflow, open Safari\".")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                HStack(spacing: 8) {
-                    TextField("Command phrase", text: $vm.miniflowWakePhrase)
-                        .textFieldStyle(.roundedBorder)
-                        .onSubmit {
-                            Task { await vm.saveMiniflowWakePhrase(vm.miniflowWakePhrase) }
-                        }
-                    Button("Save") {
-                        Task { await vm.saveMiniflowWakePhrase(vm.miniflowWakePhrase) }
-                    }
-                }
-
-                HStack(spacing: 8) {
-                    TextField("Add wake phrase variant", text: $newWakeVariant)
-                        .textFieldStyle(.roundedBorder)
-                    Button("Add") {
-                        let phrase = newWakeVariant
-                        newWakeVariant = ""
-                        Task { await vm.addMiniflowWakeVariant(phrase) }
-                    }
-                    .disabled(newWakeVariant.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-
-                if !vm.miniflowWakeVariants.isEmpty {
-                    VStack(alignment: .leading, spacing: 6) {
-                        ForEach(vm.miniflowWakeVariants.sorted(), id: \.self) { phrase in
-                            HStack {
-                                Text(phrase)
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(.secondary)
-                                Spacer()
-                                Button {
-                                    Task { await vm.removeMiniflowWakeVariant(phrase) }
-                                } label: {
-                                    Image(systemName: "trash")
-                                        .font(.system(size: 12))
-                                        .foregroundStyle(.red)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                    }
-                    .padding(.top, 4)
-                }
-
-                Text("Filler words are ignored in the transcript. Enter comma-separated values.")
+                Text("When enabled, filler words are ignored in the transcript. Enter comma-separated values.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
@@ -215,6 +156,7 @@ private struct GeneralTab: View {
                         Task { await vm.saveFillerWordsCsv(vm.fillerWordsCsv) }
                     }
                 }
+
             } header: { Text("Dictation") }
 
             Section {

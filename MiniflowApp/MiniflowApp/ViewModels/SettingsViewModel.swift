@@ -12,9 +12,6 @@ final class SettingsViewModel: ObservableObject {
     @Published var removeFillerWords = true
     @Published var customFillerWords: [String] = []
     @Published var fillerWordsCsv = ""
-    @Published var miniflowCommandsEnabled = true
-    @Published var miniflowWakePhrase = "hey miniflow"
-    @Published var miniflowWakeVariants: [String] = []
 
     private let api = APIClient.shared
     init() {}
@@ -33,9 +30,6 @@ final class SettingsViewModel: ObservableObject {
         }
         if let settings: AdvancedSettings = try? await api.invoke("get_advanced_settings") {
             removeFillerWords = settings.fillerRemoval
-            miniflowCommandsEnabled = settings.miniflowCommands
-            miniflowWakePhrase = settings.miniflowWakePhrase
-            miniflowWakeVariants = settings.miniflowWakeVariants
         }
         if let words: [String] = try? await api.invoke("get_filler_words") {
             customFillerWords = words
@@ -59,42 +53,6 @@ final class SettingsViewModel: ObservableObject {
         flashStatus("Saved")
     }
 
-    // MARK: - Miniflow commands
-
-    func saveMiniflowCommandsEnabled(_ enabled: Bool) async {
-        try? await api.invokeVoid("save_miniflow_commands", body: ["enabled": enabled])
-    }
-
-    func saveMiniflowWakePhrase(_ phrase: String) async {
-        let cleaned = phrase.trimmingCharacters(in: .whitespacesAndNewlines)
-        if cleaned.isEmpty {
-            miniflowWakePhrase = "hey miniflow"
-        } else {
-            miniflowWakePhrase = cleaned
-        }
-        try? await api.invokeVoid("save_miniflow_wake_phrase", body: ["phrase": miniflowWakePhrase])
-    }
-
-    func addMiniflowWakeVariant(_ phrase: String) async {
-        let cleaned = phrase.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !cleaned.isEmpty else { return }
-        var updated = miniflowWakeVariants.map { $0.lowercased() }
-        if updated.contains(cleaned) { return }
-        updated.append(cleaned)
-        await saveMiniflowWakeVariants(updated)
-    }
-
-    func removeMiniflowWakeVariant(_ phrase: String) async {
-        let cleaned = phrase.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        let updated = miniflowWakeVariants.filter { $0.lowercased() != cleaned }
-        await saveMiniflowWakeVariants(updated)
-    }
-
-    private func saveMiniflowWakeVariants(_ variants: [String]) async {
-        miniflowWakeVariants = variants
-        try? await api.invokeVoid("save_miniflow_wake_variants", body: ["variants": variants])
-    }
-
     // MARK: - Filler words
 
     func saveRemoveFillerWords(_ enabled: Bool) async {
@@ -110,6 +68,7 @@ final class SettingsViewModel: ObservableObject {
         fillerWordsCsv = parsed.joined(separator: ", ")
         try? await api.invokeVoid("save_filler_words", body: ["words": parsed])
     }
+
 
     // MARK: - Helpers
 
@@ -127,8 +86,5 @@ final class SettingsViewModel: ObservableObject {
 
     private struct AdvancedSettings: Decodable {
         let fillerRemoval: Bool
-        let miniflowCommands: Bool
-        let miniflowWakePhrase: String
-        let miniflowWakeVariants: [String]
     }
 }

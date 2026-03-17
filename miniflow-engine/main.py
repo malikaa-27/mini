@@ -216,10 +216,6 @@ async def invoke(command: str, body: dict = {}):
         "save_advanced_setting": lambda b: config.save_advanced_setting(b["key"], b["value"]),
         "save_user_name":        lambda b: config.save_user_name(b["name"]),
         "get_user_name":         lambda b: config.get_user_name(),
-        "save_miniflow_commands": lambda b: config.save_miniflow_commands(b.get("enabled", True)),
-        "save_miniflow_wake_phrase": lambda b: config.save_miniflow_wake_phrase(b.get("phrase", "")),
-        "get_miniflow_wake_variants": lambda b: config.get_miniflow_wake_variants(),
-        "save_miniflow_wake_variants": lambda b: config.save_miniflow_wake_variants(b.get("variants", [])),
         "get_filler_words":      lambda b: config.get_filler_words(),
         "save_filler_words":     lambda b: config.save_filler_words(b.get("words", [])),
         # Dictation
