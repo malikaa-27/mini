@@ -34,3 +34,9 @@ def remove_snippet(trigger: str):
     s = _read()
     s.pop(trigger, None)
     _write(s)
+
+
+def apply(text: str) -> str:
+    for trigger, expansion in _read().items():
+        text = text.replace(trigger, expansion)
+    return text

@@ -14,7 +14,7 @@ import base64
 import json
 import logging
 import os
-import re
+uimport re
 from contextlib import asynccontextmanager
 from typing import Any
 
@@ -177,6 +177,8 @@ async def _transcribe_audio(b: dict):
     settings = config.get_advanced_settings()
     if settings.get("filler_removal"):
         transcript = _remove_filler_words(transcript, config.get_all_filler_words())
+    transcript = dictionary.apply(transcript)
+    transcript = snippets.apply(transcript)
     return {"transcript": transcript}
 
 
