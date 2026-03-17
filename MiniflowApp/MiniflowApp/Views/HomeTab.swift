@@ -2,6 +2,8 @@ import SwiftUI
 
 struct HomeTab: View {
     @ObservedObject var vm: AgentViewModel
+    @State private var commandText = ""
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -70,7 +72,7 @@ struct HomeTab: View {
                             .foregroundStyle(Color.black)
                     }
 
-                    Text("Speak Naturally  –  Miniflow transcribes and executes your voice commands in any app")
+                    Text("Speak naturally  –  MiniFlow transcribes and executes your voice commands in any app")
                         .font(.system(size: 13))
                         .foregroundStyle(Color.textMuted)
                 }
@@ -85,6 +87,46 @@ struct HomeTab: View {
             RoundedRectangle(cornerRadius: 14)
                 .stroke(Color.fnCardBorder, lineWidth: 1)
         )
+    }
+
+    // MARK: - Command Bar
+
+    private var commandBar: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(Color.textMuted)
+                .font(.system(size: 13))
+            TextField("Type a command or ask AI...", text: $commandText)
+                .textFieldStyle(.plain)
+                .font(.system(size: 13))
+                .foregroundStyle(Color.black)
+                .onSubmit { sendCommand() }
+            if !commandText.isEmpty {
+                Button(action: sendCommand) {
+                    HStack(spacing: 5) {
+                        Image(systemName: "paperplane.fill")
+                            .font(.system(size: 11))
+                        Text("Execute")
+                            .font(.system(size: 12, weight: .semibold))
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 7)
+                    .background(Color(hex: "1C1C1E"))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 11)
+        .background(.white)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(hex: "E5E5EA"), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
     }
 
     // MARK: - History
@@ -146,6 +188,12 @@ struct HomeTab: View {
             .sorted { $0.date > $1.date }
     }
 
+    private func sendCommand() {
+        let text = commandText.trimmingCharacters(in: .whitespaces)
+        guard !text.isEmpty else { return }
+        commandText = ""
+        Task { await vm.executeCommand(text) }
+    }
 }
 
 // MARK: - History Row

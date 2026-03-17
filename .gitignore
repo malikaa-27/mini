@@ -39,3 +39,10 @@ miniflow-engine/venv/
 
 # Vercel deployment config
 .vercel/
+
+# IDE config
+.vscode/
+
+# Runtime files
+miniflow.log
+history.json

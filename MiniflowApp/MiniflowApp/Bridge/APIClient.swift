@@ -27,7 +27,7 @@ final class APIClient {
 
         let (data, response) = try await URLSession.shared.data(for: req)
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-            throw MiniflowError.httpError((response as? HTTPURLResponse)?.statusCode ?? 0)
+            throw MiniFlowError.httpError((response as? HTTPURLResponse)?.statusCode ?? 0)
         }
         return try decoder.decode(T.self, from: data)
     }
@@ -44,7 +44,7 @@ final class APIClient {
         req.timeoutInterval = 30
         let (_, response) = try await URLSession.shared.data(for: req)
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-            throw MiniflowError.httpError((response as? HTTPURLResponse)?.statusCode ?? 0)
+            throw MiniFlowError.httpError((response as? HTTPURLResponse)?.statusCode ?? 0)
         }
     }
 
@@ -64,7 +64,7 @@ final class APIClient {
 
     private struct EmptyResponse: Decodable {}
 
-    enum MiniflowError: LocalizedError {
+    enum MiniFlowError: LocalizedError {
         case httpError(Int)
         case backendNotRunning
 
