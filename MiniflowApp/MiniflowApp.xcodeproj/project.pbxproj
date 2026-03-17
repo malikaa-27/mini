@@ -29,6 +29,8 @@
 		BCF5F2B92F5FDBF000630702 /* DictationPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF5F2AF2F5FDBF000630702 /* DictationPill.swift */; };
 		BCF5F2BA2F5FDBF000630702 /* DictionaryTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF5F2B02F5FDBF000630702 /* DictionaryTab.swift */; };
 		BCF5F2BC2F5FDBFB00630702 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF5F2BB2F5FDBFB00630702 /* Color+Hex.swift */; };
+		BCF5F2BD2F5FDBFB00630702 /* GeistPixel-Square.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BCF5F2BE2F5FDBFB00630702 /* GeistPixel-Square.ttf */; };
+		BCF5F2BF2F5FDBFB00630702 /* PlaceholderTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF5F2C02F5FDBFB00630702 /* PlaceholderTab.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -57,6 +59,8 @@
 		BCF5F2B32F5FDBF000630702 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		BCF5F2B42F5FDBF000630702 /* SnippetsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetsTab.swift; sourceTree = "<group>"; };
 		BCF5F2BB2F5FDBFB00630702 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
+		BCF5F2BE2F5FDBFB00630702 /* GeistPixel-Square.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "GeistPixel-Square.ttf"; sourceTree = "<group>"; };
+		BCF5F2C02F5FDBFB00630702 /* PlaceholderTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderTab.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,8 +90,10 @@
 				BCF5F2B02F5FDBF000630702 /* DictionaryTab.swift */,
 				BCF5F2B12F5FDBF000630702 /* HomeTab.swift */,
 				BCF5F2B22F5FDBF000630702 /* MainWindowView.swift */,
+				BCF5F2C02F5FDBFB00630702 /* PlaceholderTab.swift */,
 				BCF5F2B32F5FDBF000630702 /* SidebarView.swift */,
 				BCF5F2B42F5FDBF000630702 /* SnippetsTab.swift */,
+				BCF5F2BE2F5FDBFB00630702 /* GeistPixel-Square.ttf */,
 				BCF5F2AD2F5FBF7000630702 /* HotkeyManager.swift */,
 				AA0000000000000000000201 /* MiniflowApp.swift */,
 				AA0000000000000000000202 /* AppDelegate.swift */,
@@ -207,6 +213,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BCF5F2BD2F5FDBFB00630702 /* GeistPixel-Square.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -227,6 +234,7 @@
 				BCF5F2BA2F5FDBF000630702 /* DictionaryTab.swift in Sources */,
 				AA0000000000000000000103 /* FloatingPanel.swift in Sources */,
 				BCF5F2BC2F5FDBFB00630702 /* Color+Hex.swift in Sources */,
+				BCF5F2BF2F5FDBFB00630702 /* PlaceholderTab.swift in Sources */,
 				AA0000000000000000000104 /* APIClient.swift in Sources */,
 				AA0000000000000000000105 /* EventStream.swift in Sources */,
 				AA0000000000000000000106 /* ActionResult.swift in Sources */,

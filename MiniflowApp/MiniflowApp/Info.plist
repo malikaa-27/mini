@@ -31,5 +31,7 @@
 	<string>MiniFlow needs Accessibility access to type dictated text at your cursor in any app.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>ATSApplicationFontsPath</key>
+	<string>.</string>
 </dict>
 </plist>

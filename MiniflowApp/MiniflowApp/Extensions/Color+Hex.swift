@@ -23,12 +23,13 @@ extension Color {
 // MARK: - Design Tokens
 
 extension Color {
-    static let bgWarm      = Color(hex: "F3F3F1")  // sidebar / window bg
-    static let fnCardBg    = Color(hex: "FFFCF0")  // fn card fill
-    static let fnCardBorder = Color(hex: "EDE6C3") // fn card border
-    static let accentBrown = Color(hex: "7A5C1E")  // logo, send button
-    static let navActive   = Color(hex: "E3E3E0")  // active nav item
-    static let textMuted   = Color(hex: "000000")  // secondary text
-    static let successGreen = Color(hex: "2D6A4F")
-    static let errorRed    = Color(hex: "9B1C1C")
+    static let bgWarm       = Color(hex: "FAFAFA")  // sidebar bg
+    static let fnCardBg     = Color(hex: "EEF8F2")  // fn card fill (mint)
+    static let fnCardBorder = Color(hex: "D4EDE0")  // fn card border
+    static let fnBadgeBg    = Color(hex: "2D6B5E")  // Fn key badge
+    static let accentBrown  = Color(hex: "7A5C1E")  // legacy accent
+    static let navActive    = Color(hex: "EFEFEF")  // active nav item
+    static let textMuted    = Color(hex: "888888")  // secondary text
+    static let successGreen = Color(hex: "34C759")
+    static let errorRed     = Color(hex: "FF3B30")
 }

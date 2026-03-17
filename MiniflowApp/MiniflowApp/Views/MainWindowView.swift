@@ -2,17 +2,15 @@ import SwiftUI
 
 struct MainWindowView: View {
     @ObservedObject var vm: AgentViewModel
-    @State private var selectedTab = "home"
-    @State private var showSettings = false
-    var onSettings: () -> Void
+    @State var selectedTab = "home"
 
     var body: some View {
         HStack(spacing: 0) {
 
-            // Left sidebar (200pt fixed)
-            SidebarView(vm: vm, selectedTab: $selectedTab, onSettings: onSettings)
+            // Left sidebar
+            SidebarView(vm: vm, selectedTab: $selectedTab)
 
-            // Main content area (white card)
+            // Main content area
             ZStack(alignment: .topLeading) {
                 Color.white
 
@@ -20,8 +18,10 @@ struct MainWindowView: View {
                     switch selectedTab {
                     case "dictionary":
                         DictionaryTab()
-                    case "snippets":
-                        SnippetsTab()
+                    case "shortcuts":
+                        ShortcutsTab()
+                    case "settings":
+                        SettingsTab()
                     default:
                         HomeTab(vm: vm)
                     }
@@ -29,10 +29,8 @@ struct MainWindowView: View {
             }
             .clipShape(RoundedRectangle(cornerRadius: 20))
             .padding(12)
-
-            // Right action feed removed for MVP
         }
-        .frame(width: 860, height: 600)
+        .frame(width: 880, height: 600)
         .background(Color.bgWarm)
         .preferredColorScheme(.light)
     }

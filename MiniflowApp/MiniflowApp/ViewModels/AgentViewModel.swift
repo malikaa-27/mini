@@ -18,6 +18,8 @@ final class AgentViewModel: ObservableObject {
     @Published var userName = ""
 
     @Published var lastResultAction: ActionResult?
+    @Published var totalWordsTranscribed: Int = 0
+    @Published var averageWpm: Int = 0
 
     private let api = APIClient.shared
     private let events = EventStream.shared
@@ -26,6 +28,7 @@ final class AgentViewModel: ObservableObject {
     private var historyTimer: Timer?
     private var accessibilityTimer: Timer?
     private var targetBundleID: String?
+    private var listeningStartTime: Date?
     private let defaultFillerWords = ["um", "uh", "erm", "er", "ah", "uhh", "umm", "uhm"]
 
     init() {
@@ -66,6 +69,17 @@ final class AgentViewModel: ObservableObject {
     func loadHistory() async {
         if let entries: [HistoryEntry] = try? await api.invoke("get_history") {
             history = entries
+            recomputeStats()
+        }
+    }
+
+    private func recomputeStats() {
+        totalWordsTranscribed = history.reduce(0) { acc, entry in
+            acc + entry.transcript.split(separator: " ").count
+        }
+        let totalSeconds = UserDefaults.standard.double(forKey: "mf_total_speaking_seconds")
+        if totalSeconds > 0 && totalWordsTranscribed > 0 {
+            averageWpm = Int(Double(totalWordsTranscribed) / totalSeconds * 60.0)
         }
     }
 
@@ -90,6 +104,7 @@ final class AgentViewModel: ObservableObject {
         transcript = ""
         errorMessage = nil
         lastResultAction = nil
+        listeningStartTime = Date()
 
         let granted = await audio.requestPermission()
         guard granted else {
@@ -134,8 +149,15 @@ final class AgentViewModel: ObservableObject {
             let fullText = (result["transcript"] ?? "").trimmingCharacters(in: .whitespaces)
             transcript = fullText
             if !fullText.isEmpty {
+                // Accumulate speaking time for WPM calculation
+                if let start = listeningStartTime {
+                    let duration = max(Date().timeIntervalSince(start), 1.0)
+                    let prev = UserDefaults.standard.double(forKey: "mf_total_speaking_seconds")
+                    UserDefaults.standard.set(prev + duration, forKey: "mf_total_speaking_seconds")
+                }
                 await executeCommand(fullText)
             }
+            listeningStartTime = nil
         } catch {
             errorMessage = error.localizedDescription
         }

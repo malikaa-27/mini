@@ -8,18 +8,30 @@ struct HomeTab: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
 
-                // Welcome header
-                Text(vm.userName.isEmpty
-                     ? "Welcome back"
-                     : "Welcome back, \(vm.userName)")
-                    .font(.custom("Georgia-Bold", size: 26))
-                    .foregroundStyle(Color.black)
-                    .padding(.bottom, 2)
+                // Welcome header + stats
+                HStack(alignment: .firstTextBaseline) {
+                    Text(vm.userName.isEmpty
+                         ? "Welcome back"
+                         : "Welcome back, \(vm.userName)")
+                        .font(.custom("GeistPixel-Square", size: 28))
+                        .foregroundStyle(Color.black)
 
-                // Stats row
-                statsRow
+                    Spacer()
 
-                // Fn card
+                    // Inline stats (no emojis)
+                    HStack(spacing: 0) {
+                        statPill(value: vm.totalWordsTranscribed == 0 ? "0" : "\(vm.totalWordsTranscribed)",
+                                 label: "words")
+                        Rectangle()
+                            .fill(Color(hex: "E5E5EA"))
+                            .frame(width: 1, height: 16)
+                            .padding(.horizontal, 12)
+                        statPill(value: vm.averageWpm == 0 ? "–" : "\(vm.averageWpm)",
+                                 label: "WPM")
+                    }
+                }
+
+                // Fn hint card
                 fnCard
 
                 // Command bar
@@ -29,73 +41,58 @@ struct HomeTab: View {
                 if !vm.history.isEmpty {
                     historySection
                 }
-
             }
             .padding(28)
         }
     }
 
-    // MARK: - Stats Row
+    // MARK: - Stat pill
 
-    private var statsRow: some View {
-        HStack(spacing: 0) {
-            statCell(icon: "🔥", value: "0", label: "day streak")
-            Divider().frame(height: 32)
-            statCell(icon: "🚀", value: "0", label: "words spoken")
-            Divider().frame(height: 32)
-            statCell(icon: "🏆", value: "—", label: "WPM")
+    private func statPill(value: String, label: String) -> some View {
+        HStack(spacing: 4) {
+            Text(value)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color.black)
+            Text(label)
+                .font(.system(size: 13))
+                .foregroundStyle(Color.textMuted)
         }
-        .background(.white)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(hex: "E5E5EA"), lineWidth: 1))
-    }
-
-    private func statCell(icon: String, value: String, label: String) -> some View {
-        HStack(spacing: 6) {
-            Text(icon).font(.system(size: 14))
-            VStack(alignment: .leading, spacing: 1) {
-                Text(value)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color.black)
-                Text(label)
-                    .font(.system(size: 10))
-                    .foregroundStyle(Color.black)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 10)
-        .padding(.horizontal, 8)
     }
 
     // MARK: - Fn Card
 
     private var fnCard: some View {
         VStack(alignment: .leading, spacing: 0) {
-            DictationWidget(vm: vm)
-
-            // CTA button when idle
-            if !vm.isListening && !vm.isProcessing {
-                Divider().padding(.horizontal, 16)
-                Button {
-                    Task { await vm.startListening() }
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "mic.fill")
-                            .font(.system(size: 11))
-                        Text("Start dictating")
+            if vm.isListening || vm.isProcessing {
+                DictationWidget(vm: vm)
+            } else {
+                VStack(alignment: .leading, spacing: 10) {
+                    // Title row: Hold [Fn] to start dictating
+                    HStack(spacing: 0) {
+                        Text("Hold ")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(Color.black)
+                        Text("Fn")
                             .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 9)
+                            .padding(.vertical, 4)
+                            .background(Color.fnBadgeBg)
+                            .clipShape(RoundedRectangle(cornerRadius: 7))
+                        Text(" to start dictating")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(Color.black)
                     }
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(Color(hex: "1C1C1E"))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                    Text("Speak Naturally  –  Miniflow transcribes and executes your voice commands in any app")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Color.textMuted)
                 }
-                .buttonStyle(.plain)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 18)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.fnCardBg)
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(
@@ -109,7 +106,7 @@ struct HomeTab: View {
     private var commandBar: some View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
-                .foregroundStyle(Color.black)
+                .foregroundStyle(Color.textMuted)
                 .font(.system(size: 13))
             TextField("Type a command or ask AI...", text: $commandText)
                 .textFieldStyle(.plain)
@@ -144,39 +141,33 @@ struct HomeTab: View {
         .shadow(color: .black.opacity(0.04), radius: 3, y: 1)
     }
 
-    // MARK: - History (table style)
+    // MARK: - History
 
     private var historySection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            let groups = groupedHistory
-            let sortedKeys = groups.keys.sorted { groupOrder($0) < groupOrder($1) }
-
-            ForEach(sortedKeys, id: \.self) { key in
-                VStack(alignment: .leading, spacing: 0) {
-                    // Date header
+        VStack(alignment: .leading, spacing: 20) {
+            ForEach(groupedHistory, id: \.key) { group in
+                VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Text(key.uppercased())
+                        Text(group.key)
                             .font(.system(size: 10, weight: .semibold))
                             .foregroundStyle(Color.black)
                         Spacer()
-                        if key == "Today" {
-                            Button("Clear all") {
-                                Task { try? await APIClient.shared.invokeVoid("clear_history")
-                                      await vm.loadHistory() }
+                        Button("Clear all") {
+                            Task {
+                                try? await APIClient.shared.invokeVoid("clear_history")
+                                await vm.loadHistory()
                             }
-                            .buttonStyle(.plain)
-                            .font(.system(size: 10))
-                            .foregroundStyle(Color.black)
                         }
+                        .buttonStyle(.plain)
+                        .font(.system(size: 10))
+                        .foregroundStyle(Color.textMuted)
                     }
-                    .padding(.bottom, 6)
 
-                    // Table
                     VStack(spacing: 0) {
-                        ForEach(Array((groups[key] ?? []).enumerated()), id: \.element.id) { idx, entry in
+                        ForEach(Array(group.entries.enumerated()), id: \.element.id) { idx, entry in
                             HistoryRow(entry: entry)
-                            if idx < (groups[key]?.count ?? 0) - 1 {
-                                Divider().padding(.leading, 70)
+                            if idx < group.entries.count - 1 {
+                                Divider().padding(.leading, 90)
                             }
                         }
                     }
@@ -188,33 +179,25 @@ struct HomeTab: View {
         }
     }
 
-    private var groupedHistory: [String: [HistoryEntry]] {
-        var result: [String: [HistoryEntry]] = [:]
-        let cal = Calendar.current
+    private var groupedHistory: [(key: String, date: Date, entries: [HistoryEntry])] {
+        var buckets: [String: (date: Date, entries: [HistoryEntry])] = [:]
         let iso = ISO8601DateFormatter()
         iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let fmt = DateFormatter()
+        fmt.dateFormat = "MMMM d, yyyy"
 
         for entry in vm.history {
             guard let date = iso.date(from: entry.timestamp) else { continue }
-            let key: String
-            if cal.isDateInToday(date)          { key = "Today" }
-            else if cal.isDateInYesterday(date) { key = "Yesterday" }
-            else {
-                let fmt = DateFormatter()
-                fmt.dateFormat = "MMMM d"
-                key = fmt.string(from: date).uppercased()
+            let key = fmt.string(from: date).uppercased()
+            if buckets[key] == nil {
+                buckets[key] = (date: date, entries: [])
             }
-            result[key, default: []].append(entry)
+            buckets[key]!.entries.append(entry)
         }
-        return result
-    }
 
-    private func groupOrder(_ key: String) -> Int {
-        switch key {
-        case "Today":     return 0
-        case "Yesterday": return 1
-        default:          return 2
-        }
+        return buckets
+            .map { (key: $0.key, date: $0.value.date, entries: $0.value.entries) }
+            .sorted { $0.date > $1.date }
     }
 
     private func sendCommand() {
@@ -225,35 +208,52 @@ struct HomeTab: View {
     }
 }
 
-// MARK: - History Row (table style)
+// MARK: - History Row
 
 private struct HistoryRow: View {
     let entry: HistoryEntry
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            // Time column
             Text(formattedTime(entry.timestamp))
                 .font(.system(size: 11))
-                .foregroundStyle(Color.black)
-                .frame(width: 58, alignment: .leading)
-                .padding(.top, 1)
+                .foregroundStyle(Color.textMuted)
+                .frame(width: 68, alignment: .leading)
+                .padding(.top, 2)
 
-            // Command text
-            Text(entry.transcript)
-                .font(.system(size: 13))
-                .foregroundStyle(Color.black)
-                .lineLimit(1)
+            VStack(alignment: .leading, spacing: 6) {
+                Text(entry.transcript)
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.black)
+                    .lineLimit(2)
+
+                if !entry.actions.isEmpty {
+                    HStack(spacing: 6) {
+                        ForEach(actionTags, id: \.self) { tag in
+                            Text(tag)
+                                .font(.system(size: 11))
+                                .foregroundStyle(Color(hex: "2D6B5E"))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(Color(hex: "E4F3EC"))
+                                .clipShape(RoundedRectangle(cornerRadius: 5))
+                        }
+                    }
+                }
+            }
 
             Spacer()
-
-            // Success indicator
-            Image(systemName: entry.actions.allSatisfy({ $0.success }) ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .font(.system(size: 12))
-                .foregroundStyle(entry.actions.allSatisfy({ $0.success }) ? Color(hex: "34C759") : Color(hex: "FF3B30"))
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+    }
+
+    private var actionTags: [String] {
+        var seen = Set<String>()
+        return entry.actions.compactMap { action in
+            let label = action.action.prefix(1).uppercased() + action.action.dropFirst()
+            return seen.insert(label).inserted ? label : nil
+        }
     }
 
     private func formattedTime(_ timestamp: String) -> String {

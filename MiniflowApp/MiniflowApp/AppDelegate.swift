@@ -11,7 +11,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var mainWindow: NSWindow?
     private var pillPanel: FloatingPanel?
-    private var settingsWindow: NSWindow?
 
     private var agentVM: AgentViewModel!
     private var statusCancellable: AnyCancellable?
@@ -103,11 +102,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             defer: false
         )
         win.title = "MiniFlow"
-        win.contentView = NSHostingView(
-            rootView: MainWindowView(vm: agentVM, onSettings: { [weak self] in
-                self?.openSettings()
-            })
-        )
+        win.contentView = NSHostingView(rootView: MainWindowView(vm: agentVM))
         win.center()
         win.isReleasedWhenClosed = false
         mainWindow = win
@@ -161,25 +156,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
     }
 
-    // MARK: - Settings Window
+    // MARK: - Settings (now a tab in the main window)
 
     @objc func openSettings() {
-        if let win = settingsWindow, win.isVisible {
-            win.makeKeyAndOrderFront(nil)
-            return
-        }
-        let win = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 560, height: 440),
-            styleMask: [.titled, .closable, .miniaturizable],
-            backing: .buffered,
-            defer: false
-        )
-        win.title = "MiniFlow Settings"
-        win.contentView = NSHostingView(rootView: SettingsView())
-        win.center()
-        win.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
-        settingsWindow = win
+        toggleMainWindow()
     }
 
     // MARK: - Fn Hotkey (hold-to-talk)
