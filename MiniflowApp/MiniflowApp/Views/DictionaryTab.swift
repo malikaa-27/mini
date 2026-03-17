@@ -197,7 +197,7 @@ private struct AddDictionaryEntrySheet: View {
                 Text("Say this…")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(Color.textMuted)
-                TextField("e.g. Devanche", text: $fromWord)
+                TextField("e.g. on my way", text: $fromWord)
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: 13))
             }
@@ -206,7 +206,7 @@ private struct AddDictionaryEntrySheet: View {
                 Text("Replace with…")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(Color.textMuted)
-                TextField("e.g. Devansh", text: $toWord)
+                TextField("e.g. omw", text: $toWord)
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: 13))
             }

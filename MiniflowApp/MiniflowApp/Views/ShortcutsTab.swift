@@ -223,12 +223,10 @@ private struct AddShortcutSheet: View {
                                 .foregroundStyle(Color(hex: "BBBBBB"))
                                 .padding(.leading, 5)
                                 .padding(.top, 8)
+                                .allowsHitTesting(false)
                         }
-                        TextEditor(text: $expansion)
-                            .font(.system(size: 13))
+                        PlainTextEditor(text: $expansion)
                             .frame(height: 80)
-                            .scrollContentBackground(.hidden)
-                            .background(.clear)
                     }
                     .padding(4)
                     .overlay(
@@ -270,6 +268,46 @@ private struct AddShortcutSheet: View {
         }
         .padding(24)
         .frame(width: 360)
+    }
+}
+
+// MARK: - Plain Text Editor (no link detection)
+
+private struct PlainTextEditor: NSViewRepresentable {
+    @Binding var text: String
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    func makeNSView(context: Context) -> NSScrollView {
+        let scrollView = NSTextView.scrollableTextView()
+        let textView = scrollView.documentView as! NSTextView
+        textView.delegate = context.coordinator
+        textView.font = .systemFont(ofSize: 13)
+        textView.textColor = .labelColor
+        textView.backgroundColor = .clear
+        textView.drawsBackground = false
+        textView.isAutomaticLinkDetectionEnabled = false
+        textView.isAutomaticDataDetectionEnabled = false
+        textView.textContainerInset = NSSize(width: 0, height: 8)
+        textView.textContainer?.lineFragmentPadding = 5
+        scrollView.drawsBackground = false
+        scrollView.hasVerticalScroller = false
+        scrollView.hasHorizontalScroller = false
+        return scrollView
+    }
+
+    func updateNSView(_ scrollView: NSScrollView, context: Context) {
+        let textView = scrollView.documentView as! NSTextView
+        if textView.string != text { textView.string = text }
+    }
+
+    class Coordinator: NSObject, NSTextViewDelegate {
+        var parent: PlainTextEditor
+        init(_ parent: PlainTextEditor) { self.parent = parent }
+        func textDidChange(_ notification: Notification) {
+            guard let tv = notification.object as? NSTextView else { return }
+            parent.text = tv.string
+        }
     }
 }
 
