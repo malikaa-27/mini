@@ -52,15 +52,15 @@
 		AA0000000000000000000210 /* MiniflowApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MiniflowApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA000000000000000000021E /* AudioCaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCaptureService.swift; sourceTree = "<group>"; };
 		BCF5F2AD2F5FBF7000630702 /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
-		BCF5F2AF2F5FDBF000630702 /* DictationPill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationPill.swift; sourceTree = "<group>"; };
-		BCF5F2B02F5FDBF000630702 /* DictionaryTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryTab.swift; sourceTree = "<group>"; };
-		BCF5F2B12F5FDBF000630702 /* HomeTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeTab.swift; sourceTree = "<group>"; };
-		BCF5F2B22F5FDBF000630702 /* MainWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowView.swift; sourceTree = "<group>"; };
-		BCF5F2B32F5FDBF000630702 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
-		BCF5F2B42F5FDBF000630702 /* SnippetsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetsTab.swift; sourceTree = "<group>"; };
-		BCF5F2BB2F5FDBFB00630702 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
+		BCF5F2AF2F5FDBF000630702 /* DictationPill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DictationPill.swift; path = "Views/DictationPill.swift"; sourceTree = "<group>"; };
+		BCF5F2B02F5FDBF000630702 /* DictionaryTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DictionaryTab.swift; path = "Views/DictionaryTab.swift"; sourceTree = "<group>"; };
+		BCF5F2B12F5FDBF000630702 /* HomeTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HomeTab.swift; path = "Views/HomeTab.swift"; sourceTree = "<group>"; };
+		BCF5F2B22F5FDBF000630702 /* MainWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MainWindowView.swift; path = "Views/MainWindowView.swift"; sourceTree = "<group>"; };
+		BCF5F2B32F5FDBF000630702 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SidebarView.swift; path = "Views/SidebarView.swift"; sourceTree = "<group>"; };
+		BCF5F2B42F5FDBF000630702 /* SnippetsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SnippetsTab.swift; path = "Views/SnippetsTab.swift"; sourceTree = "<group>"; };
+		BCF5F2BB2F5FDBFB00630702 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Color+Hex.swift"; path = "Extensions/Color+Hex.swift"; sourceTree = "<group>"; };
 		BCF5F2BE2F5FDBFB00630702 /* GeistPixel-Square.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "GeistPixel-Square.ttf"; path = "Fonts/GeistPixel-Square.ttf"; sourceTree = "<group>"; };
-		BCF5F2C02F5FDBFB00630702 /* PlaceholderTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderTab.swift; sourceTree = "<group>"; };
+		BCF5F2C02F5FDBFB00630702 /* PlaceholderTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PlaceholderTab.swift; path = "Views/PlaceholderTab.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
