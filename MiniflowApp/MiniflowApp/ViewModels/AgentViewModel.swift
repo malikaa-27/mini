@@ -304,9 +304,7 @@ final class AgentViewModel: ObservableObject {
             return text
         }
         guard settings.fillerRemoval else { return text }
-        let custom: [String] = (try? await api.invoke("get_filler_words")) ?? []
-        let words = defaultFillerWords + custom
-        return removeFillerWords(text, words: words)
+        return removeFillerWords(text, words: defaultFillerWords)
     }
 
     private func removeFillerWords(_ text: String, words: [String]) -> String {

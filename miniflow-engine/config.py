@@ -31,7 +31,6 @@ DEFAULT_SETTINGS = {
     "whisper_mode": False,
     "developer_mode": False,
     "filler_removal": True,
-    "custom_filler_words": [],
     "user_name": None,
 }
 
@@ -124,27 +123,7 @@ def get_current_language() -> str:
 
 # ── Filler words ──
 
-def get_filler_words() -> list[str]:
-    s = _read_settings()
-    words = s.get("custom_filler_words") or []
-    return [w for w in words if isinstance(w, str)]
-
-def save_filler_words(words: list[str]):
-    cleaned = []
-    seen = set()
-    for w in words:
-        if not isinstance(w, str):
-            continue
-        t = w.strip().lower()
-        if not t or t in seen:
-            continue
-        seen.add(t)
-        cleaned.append(t)
-    s = _read_settings()
-    s["custom_filler_words"] = cleaned
-    _write_settings(s)
-
 def get_all_filler_words() -> list[str]:
-    return DEFAULT_FILLER_WORDS + get_filler_words()
+    return DEFAULT_FILLER_WORDS
 
 

@@ -10,8 +10,6 @@ final class SettingsViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var saveStatus: String?
     @Published var removeFillerWords = true
-    @Published var customFillerWords: [String] = []
-    @Published var fillerWordsCsv = ""
 
     private let api = APIClient.shared
     init() {}
@@ -30,10 +28,6 @@ final class SettingsViewModel: ObservableObject {
         }
         if let settings: AdvancedSettings = try? await api.invoke("get_advanced_settings") {
             removeFillerWords = settings.fillerRemoval
-        }
-        if let words: [String] = try? await api.invoke("get_filler_words") {
-            customFillerWords = words
-            fillerWordsCsv = words.joined(separator: ", ")
         }
     }
 
@@ -58,17 +52,6 @@ final class SettingsViewModel: ObservableObject {
     func saveRemoveFillerWords(_ enabled: Bool) async {
         try? await api.invokeVoid("save_advanced_setting", body: ["key": "filler_removal", "value": enabled])
     }
-
-    func saveFillerWordsCsv(_ csv: String) async {
-        let parsed = csv
-            .split(separator: ",")
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
-            .filter { !$0.isEmpty }
-        customFillerWords = parsed
-        fillerWordsCsv = parsed.joined(separator: ", ")
-        try? await api.invokeVoid("save_filler_words", body: ["words": parsed])
-    }
-
 
     // MARK: - Helpers
 

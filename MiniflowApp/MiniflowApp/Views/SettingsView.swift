@@ -142,20 +142,9 @@ private struct GeneralTab: View {
                     .onChange(of: vm.removeFillerWords) { enabled in
                         Task { await vm.saveRemoveFillerWords(enabled) }
                     }
-                Text("When enabled, filler words are ignored in the transcript. Enter comma-separated values.")
+                Text("When enabled, filler words are ignored in the transcript.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-
-                HStack(spacing: 8) {
-                    TextField("Filler words (comma-separated)", text: $vm.fillerWordsCsv)
-                        .textFieldStyle(.roundedBorder)
-                        .onSubmit {
-                            Task { await vm.saveFillerWordsCsv(vm.fillerWordsCsv) }
-                        }
-                    Button("Save") {
-                        Task { await vm.saveFillerWordsCsv(vm.fillerWordsCsv) }
-                    }
-                }
 
             } header: { Text("Dictation") }
 
