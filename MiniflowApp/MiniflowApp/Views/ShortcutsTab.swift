@@ -218,11 +218,11 @@ private struct AddShortcutSheet: View {
                         .foregroundStyle(Color.textMuted)
                     ZStack(alignment: .topLeading) {
                         if expansion.isEmpty {
-                            Text("e.g. devansh@smallest.ai")
+                            Text("john@example.com")
                                 .font(.system(size: 13))
                                 .foregroundStyle(Color(hex: "BBBBBB"))
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 8)
+                                .padding(.leading, 5)
+                                .padding(.top, 8)
                         }
                         TextEditor(text: $expansion)
                             .font(.system(size: 13))
