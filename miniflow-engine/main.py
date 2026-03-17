@@ -28,7 +28,7 @@ import audio
 import dictation
 import history
 import dictionary
-import snippets
+import shortcuts
 import styles
 
 import pathlib
@@ -177,6 +177,8 @@ async def _transcribe_audio(b: dict):
     settings = config.get_advanced_settings()
     if settings.get("filler_removal"):
         transcript = _remove_filler_words(transcript, config.get_all_filler_words())
+    transcript = dictionary.apply(transcript)
+    transcript = shortcuts.apply(transcript)
     return {"transcript": transcript}
 
 
@@ -230,10 +232,10 @@ async def invoke(command: str, body: dict = {}):
         "remove_dictionary_word": lambda b: dictionary.remove_word(b["from"]),
         "get_dictionary":        lambda b: dictionary.get_dictionary(),
         "import_dictionary":     lambda b: dictionary.import_dictionary(b["entries"]),
-        # Snippets
-        "add_snippet":           lambda b: snippets.add_snippet(b["trigger"], b["expansion"]),
-        "remove_snippet":        lambda b: snippets.remove_snippet(b["trigger"]),
-        "get_snippets":          lambda b: snippets.get_snippets(),
+        # Shortcuts
+        "add_shortcut":          lambda b: shortcuts.add_shortcut(b["trigger"], b["expansion"]),
+        "remove_shortcut":       lambda b: shortcuts.remove_shortcut(b["trigger"]),
+        "get_shortcuts":         lambda b: shortcuts.get_shortcuts(),
         # Styles
         "get_style_preferences": lambda b: styles.get_style_preferences(),
         "save_style_preference": lambda b: styles.save_style_preference(b["category"], b["tone"]),
