@@ -3,6 +3,7 @@
 import json
 import re
 from pathlib import Path
+from typing import Optional
 
 DICT_FILE = Path.home() / "miniflow" / "dictionary.json"
 
@@ -12,8 +13,8 @@ DICT_FILE = Path.home() / "miniflow" / "dictionary.json"
 # The compiled regex pattern is rebuilt only when the dict actually changes,
 # avoiding N re.compile() + N re.sub() passes on every transcription.
 
-_cache: dict[str, str] = {}       # lower-cased keys → replacement values
-_cache_pattern: re.Pattern | None = None
+_cache = {}       # lower-cased keys → replacement values
+_cache_pattern: Optional[re.Pattern] = None
 
 
 def _read() -> dict:

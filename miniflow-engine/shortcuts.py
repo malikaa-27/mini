@@ -3,6 +3,7 @@
 import json
 import re
 from pathlib import Path
+from typing import Optional
 
 SHORTCUTS_FILE = Path.home() / "miniflow" / "shortcuts.json"
 
@@ -13,8 +14,8 @@ SHORTCUTS_FILE = Path.home() / "miniflow" / "shortcuts.json"
 # avoiding N str.replace passes on every transcription.
 # Note: shortcuts are case-sensitive exact matches (no re.IGNORECASE).
 
-_cache: dict[str, str] = {}
-_cache_pattern: re.Pattern | None = None
+_cache = {}
+_cache_pattern: Optional[re.Pattern] = None
 
 
 def _read() -> dict:
