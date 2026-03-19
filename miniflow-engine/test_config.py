@@ -341,8 +341,8 @@ class TestAdvancedSettingsContracts:
     def test_57_settings_do_not_expose_user_name(self, cfg):
         assert "user_name" not in cfg.get_advanced_settings()
 
-    def test_58_advanced_settings_has_exactly_three_keys(self, cfg):
-        assert len(cfg.get_advanced_settings()) == 3
+    def test_58_advanced_settings_has_exactly_four_keys(self, cfg):
+        assert len(cfg.get_advanced_settings()) == 4
 
     def test_59_all_values_are_booleans(self, cfg):
         for v in cfg.get_advanced_settings().values():
