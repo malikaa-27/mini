@@ -13,6 +13,8 @@ Tests that require a live server are marked @pytest.mark.integration.
 Tests that only need the text pipeline run without any server.
 """
 
+from __future__ import annotations
+
 import pytest
 import sys
 import os
