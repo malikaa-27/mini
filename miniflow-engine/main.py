@@ -29,7 +29,6 @@ import dictation
 import history
 import dictionary
 import shortcuts
-import styles
 
 import pathlib
 _log_path = pathlib.Path.home() / "miniflow" / "miniflow.log"
@@ -236,9 +235,6 @@ async def invoke(command: str, body: dict = {}):
         "add_shortcut":          lambda b: shortcuts.add_shortcut(b["trigger"], b["expansion"]),
         "remove_shortcut":       lambda b: shortcuts.remove_shortcut(b["trigger"]),
         "get_shortcuts":         lambda b: shortcuts.get_shortcuts(),
-        # Styles
-        "get_style_preferences": lambda b: styles.get_style_preferences(),
-        "save_style_preference": lambda b: styles.save_style_preference(b["category"], b["tone"]),
         # App
         "open_settings":         lambda b: None,
     }

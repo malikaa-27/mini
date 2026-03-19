@@ -58,7 +58,7 @@ struct HomeTab: View {
                     // Title row: Hold [Fn] to start dictating
                     HStack(spacing: 0) {
                         Text("Hold ")
-                            .font(.system(size: 17, weight: .semibold))
+                            .font(.custom("GeistPixel-Square", size: 17))
                             .foregroundStyle(Color.black)
                         Text("Fn")
                             .font(.system(size: 12, weight: .semibold))
@@ -68,12 +68,12 @@ struct HomeTab: View {
                             .background(Color.fnBadgeBg)
                             .clipShape(RoundedRectangle(cornerRadius: 7))
                         Text(" to start dictating")
-                            .font(.system(size: 17, weight: .semibold))
+                            .font(.custom("GeistPixel-Square", size: 17))
                             .foregroundStyle(Color.black)
                     }
 
                     Text("Speak naturally  –  MiniFlow transcribes and executes your voice commands in any app")
-                        .font(.system(size: 13))
+                        .font(.system(size: 13, weight: .regular))
                         .foregroundStyle(Color.textMuted)
                 }
                 .padding(.horizontal, 20)
@@ -200,6 +200,7 @@ struct HomeTab: View {
 
 private struct HistoryRow: View {
     let entry: HistoryEntry
+    @State private var showFullTranscript = false
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -211,7 +212,7 @@ private struct HistoryRow: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(entry.transcript)
-                    .font(.system(size: 13))
+                    .font(.system(size: 13, weight: .regular))
                     .foregroundStyle(Color.black)
                     .lineLimit(2)
 
@@ -231,9 +232,30 @@ private struct HistoryRow: View {
             }
 
             Spacer()
+
+            if entry.transcript.count > 80 {
+                Button {
+                    showFullTranscript = true
+                } label: {
+                    Image(systemName: "arrow.up.left.and.arrow.down.right")
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.textMuted)
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 2)
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if entry.transcript.count > 80 {
+                showFullTranscript = true
+            }
+        }
+        .sheet(isPresented: $showFullTranscript) {
+            FullTranscriptSheet(transcript: entry.transcript, timestamp: formattedTime(entry.timestamp))
+        }
     }
 
     private var actionTags: [String] {
@@ -251,5 +273,48 @@ private struct HistoryRow: View {
         let fmt = DateFormatter()
         fmt.dateFormat = "hh:mm a"
         return fmt.string(from: date)
+    }
+}
+
+// MARK: - Full Transcript Sheet
+
+private struct FullTranscriptSheet: View {
+    let transcript: String
+    let timestamp: String
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Full transcript")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Color.black)
+                    Text(timestamp)
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.textMuted)
+                }
+                Spacer()
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(Color.textMuted)
+                }
+                .buttonStyle(.plain)
+            }
+
+            ScrollView {
+                Text(transcript)
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundStyle(Color.black)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .textSelection(.enabled)
+            }
+
+            Spacer()
+        }
+        .padding(24)
+        .frame(width: 400, height: 280)
+        .preferredColorScheme(.light)
     }
 }
