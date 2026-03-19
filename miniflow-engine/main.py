@@ -325,6 +325,12 @@ def _convert_numerals(text: str) -> str:
 
     # ── Post-passes ───────────────────────────────────────────────────────────
     result = " ".join(out)
+    # Phone fragments: "+1, 732, 405, 1036" → "+17324051036"
+    result = re.sub(
+        r'\+\d+(?:,\s*\d+)+',
+        lambda m: '+' + re.sub(r'\D', '', m.group(0)),
+        result,
+    )
     # Decimal: "1 point 5" → "1.5"
     result = re.sub(r'(\d+)\s+[Pp]oint\s+(\d+)', r'\1.\2', result)
     # Time: "3 45 PM" → "3:45 PM"  (minute must be 00-59)

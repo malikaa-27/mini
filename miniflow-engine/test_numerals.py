@@ -136,6 +136,11 @@ def _convert(text: str) -> str:
         i += 1
 
     result = " ".join(out)
+    result = re.sub(
+        r'\+\d+(?:,\s*\d+)+',
+        lambda m: '+' + re.sub(r'\D', '', m.group(0)),
+        result,
+    )
     result = re.sub(r'(\d+)\s+[Pp]oint\s+(\d+)', r'\1.\2', result)
     result = re.sub(r'\b(\d{1,2})\s+([0-5]\d)\s*(AM|PM)\b', r'\1:\2 \3', result)
     return result
@@ -634,3 +639,16 @@ class TestCompoundNumbers:
         result = _convert("at nine A M sharp")
         assert "AM" in result
         assert "sharp" in result
+
+    def test_116_phone_stt_comma_fragments_merged(self):
+        # STT sometimes inserts commas: "+1, 732, 405, 1036" → "+17324051036"
+        result = _convert("+1, 732, 405, 1036")
+        assert result == "+17324051036"
+
+    def test_117_phone_fragments_in_sentence(self):
+        result = _convert("Hey, we can connect on +1, 732, 405, 1036.")
+        assert "+17324051036" in result
+
+    def test_118_two_fragment_groups(self):
+        result = _convert("+44, 207, 123, 4567")
+        assert result == "+442071234567"
