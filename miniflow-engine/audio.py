@@ -6,6 +6,7 @@ single HTTP POST to the Smallest AI Waves REST API (one-shot, no WebSocket).
 from __future__ import annotations
 
 import logging
+import time
 
 import httpx
 
@@ -28,11 +29,13 @@ async def transcribe(wav_bytes: bytes) -> str:
     }
     params = {"model": "pulse", "language": "en"}
 
+    t0 = time.perf_counter()
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(url, headers=headers, params=params, content=wav_bytes)
         resp.raise_for_status()
         data = resp.json()
+    stt_ms = (time.perf_counter() - t0) * 1000
 
     transcript = data.get("transcription") or data.get("transcript") or ""
-    log.info(f"Waves transcript: '{transcript}'")
+    log.info(f"[LATENCY] Smallest AI STT: {stt_ms:.0f}ms | transcript: '{transcript}'")
     return transcript

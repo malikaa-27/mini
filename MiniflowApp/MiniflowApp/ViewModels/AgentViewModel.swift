@@ -29,6 +29,7 @@ final class AgentViewModel: ObservableObject {
     private var accessibilityTimer: Timer?
     private var targetBundleID: String?
     private var listeningStartTime: Date?
+    private var keyReleaseTime: Date?
     private let defaultFillerWords = ["um", "uh", "erm", "er", "ah", "uhh", "umm", "uhm"]
 
     init() {
@@ -138,6 +139,7 @@ final class AgentViewModel: ObservableObject {
     func stopListening() async {
         guard isListening else { return }
         isListening = false
+        keyReleaseTime = Date()
 
         let wavData = audio.stopCaptureAndGetWav()
         guard !wavData.isEmpty else { return }
@@ -263,6 +265,10 @@ final class AgentViewModel: ObservableObject {
                 }
             }
 
+            if let t0 = keyReleaseTime {
+                let ms = Int(Date().timeIntervalSince(t0) * 1000)
+                axLog("[LATENCY] Key release → text typed: \(ms)ms")
+            }
             await typeTextLocally(text)
             axLog("handleLocalDictation: typed via CGEvent")
             return
