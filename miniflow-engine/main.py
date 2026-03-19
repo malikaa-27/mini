@@ -176,9 +176,160 @@ async def _transcribe_audio(b: dict):
     settings = config.get_advanced_settings()
     if settings.get("filler_removal"):
         transcript = _remove_filler_words(transcript, config.get_all_filler_words())
+    if settings.get("numeral_mode"):
+        transcript = _convert_numerals(transcript)
     transcript = dictionary.apply(transcript)
     transcript = shortcuts.apply(transcript)
     return {"transcript": transcript}
+
+
+try:
+    from word2number import w2n as _w2n_mod
+    def _w2i(phrase: str) -> str | None:
+        try:
+            return str(_w2n_mod.word_to_num(phrase))
+        except Exception:
+            return None
+except ImportError:
+    def _w2i(phrase: str) -> str | None:  # type: ignore[misc]
+        return None
+
+_DIGIT_WORDS = {
+    "zero": "0", "oh": "0", "one": "1", "two": "2", "three": "3",
+    "four": "4", "five": "5", "six": "6", "seven": "7", "eight": "8", "nine": "9",
+}
+
+_COMPOUND_WORDS = frozenset({
+    "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
+    "seventeen", "eighteen", "nineteen",
+    "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety",
+    "hundred", "thousand", "million", "billion",
+})
+
+_ANY_NUM_WORD = frozenset(set(_DIGIT_WORDS) | _COMPOUND_WORDS)
+
+
+def _convert_numerals(text: str) -> str:
+    """Convert spoken number words to numerals.
+
+    PIN/phone  : 'two five six four'                → '2564'
+    Plus prefix: 'plus one four four four'          → '+1444'
+    Compound   : 'twenty-five'                      → '25'
+    Decimal    : 'one point five'                   → '1.5'
+    Time       : 'three forty-five P M'             → '3:45 PM'
+    """
+    if not text:
+        return text
+
+    # ── Pre-passes ────────────────────────────────────────────────────────────
+    # Hyphenated compounds: "twenty-five" → "twenty five"
+    text = re.sub(
+        r'\b(twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)'
+        r'-(one|two|three|four|five|six|seven|eight|nine)\b',
+        r'\1 \2', text, flags=re.I,
+    )
+    # Spaced AM/PM: "P M" / "A M" → "PM" / "AM"
+    text = re.sub(r'\bA\s+M\b', 'AM', text, flags=re.I)
+    text = re.sub(r'\bP\s+M\b', 'PM', text, flags=re.I)
+
+    def _clean(tok: str) -> str:
+        return re.sub(r"[.,;:!?'\"]+$", "", tok).lower()
+
+    def _trail(tok: str) -> str:
+        return tok[len(re.sub(r"[.,;:!?'\"]+$", "", tok)):]
+
+    def _is_compound_start(idx: int) -> bool:
+        """True when token starts a compound number span."""
+        c = _clean(tokens[idx])
+        if c in _COMPOUND_WORDS:
+            return True
+        # digit word immediately before a compound word (e.g. "one hundred")
+        if c in _DIGIT_WORDS and idx + 1 < len(tokens) and _clean(tokens[idx + 1]) in _COMPOUND_WORDS:
+            return True
+        return False
+
+    tokens = text.split()
+    out: list[str] = []
+    i = 0
+
+    while i < len(tokens):
+        c = _clean(tokens[i])
+
+        # ── plus prefix → phone / country code ───────────────────────────────
+        if c == "plus" and i + 1 < len(tokens) and _clean(tokens[i + 1]) in _DIGIT_WORDS:
+            i += 1
+            run = "+"
+            while i < len(tokens) and _clean(tokens[i]) in _DIGIT_WORDS:
+                dig = _DIGIT_WORDS[_clean(tokens[i])]
+                trail = _trail(tokens[i])
+                i += 1
+                if trail:
+                    out.append(run + dig + trail)
+                    run = ""
+                    break
+                run += dig
+            if run:
+                out.append(run)
+            continue
+
+        # ── compound number span (word2number) ───────────────────────────────
+        if _is_compound_start(i):
+            j = i
+            parts: list[str] = []
+            while j < len(tokens):
+                ct = _clean(tokens[j])
+                if ct in _ANY_NUM_WORD:
+                    parts.append(ct)
+                    j += 1
+                elif ct == "and" and j + 1 < len(tokens) and _clean(tokens[j + 1]) in _ANY_NUM_WORD:
+                    j += 1  # skip "and"; w2n handles without it
+                else:
+                    break
+
+            phrase = " ".join(parts)
+            converted = _w2i(phrase)
+            if converted is not None:
+                trail = _trail(tokens[j - 1])
+                # Time suffix: AM/PM immediately after, only if no trailing punct
+                if not trail and j < len(tokens) and _clean(tokens[j]) in ("am", "pm"):
+                    out.append(converted + " " + tokens[j].upper())
+                    j += 1
+                else:
+                    out.append(converted + trail)
+                i = j
+                continue
+            # word2number failed → fall through to digit-sequence path if applicable
+            if c not in _DIGIT_WORDS:
+                out.append(tokens[i])
+                i += 1
+                continue
+
+        # ── single-digit word sequence → concatenated run (PIN / code) ───────
+        if c in _DIGIT_WORDS:
+            run = ""
+            while i < len(tokens) and _clean(tokens[i]) in _DIGIT_WORDS:
+                dig = _DIGIT_WORDS[_clean(tokens[i])]
+                trail = _trail(tokens[i])
+                i += 1
+                if trail:
+                    out.append(run + dig + trail)
+                    run = ""
+                    break
+                run += dig
+            if run:
+                out.append(run)
+            continue
+
+        out.append(tokens[i])
+        i += 1
+
+    # ── Post-passes ───────────────────────────────────────────────────────────
+    result = " ".join(out)
+    # Decimal: "1 point 5" → "1.5"
+    result = re.sub(r'(\d+)\s+[Pp]oint\s+(\d+)', r'\1.\2', result)
+    # Time: "3 45 PM" → "3:45 PM"  (minute must be 00-59)
+    result = re.sub(r'\b(\d{1,2})\s+([0-5]\d)\s*(AM|PM)\b', r'\1:\2 \3', result)
+    return result
 
 
 def _remove_filler_words(text: str, words: list[str]) -> str:

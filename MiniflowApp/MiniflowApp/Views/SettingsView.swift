@@ -174,6 +174,21 @@ struct SettingsTab: View {
                     Divider().padding(.horizontal, 16)
 
                     settingsRow(
+                        title: "Numeral Mode",
+                        subtitle: "Converts spoken digits to numbers — \"two five six\" → 256, \"plus one four\" → +14."
+                    ) {
+                        Toggle("", isOn: $vm.numeralMode)
+                            .labelsHidden()
+                            .toggleStyle(.switch)
+                            .controlSize(.small)
+                            .onChange(of: vm.numeralMode) { enabled in
+                                Task { await vm.saveNumeralMode(enabled) }
+                            }
+                    }
+
+                    Divider().padding(.horizontal, 16)
+
+                    settingsRow(
                         title: "Accessibility Permission",
                         subtitle: "Required for MiniFlow to type into other apps."
                     ) {

@@ -212,8 +212,8 @@ private struct HistoryRow: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(entry.transcript)
-                    .font(.custom("Geist-Regular", size: 13))
-                    .foregroundStyle(Color.black)
+                    .font(.custom("Geist-Regular", size: 16))
+                    .foregroundStyle(Color(hex: "1F2937"))
                     .lineLimit(2)
 
                 if !entry.actions.isEmpty {
