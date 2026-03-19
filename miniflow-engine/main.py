@@ -178,6 +178,8 @@ async def _transcribe_audio(b: dict):
         transcript = _remove_filler_words(transcript, config.get_all_filler_words())
     if settings.get("numeral_mode"):
         transcript = _convert_numerals(transcript)
+    if settings.get("newline_mode"):
+        transcript = re.sub(r'\s*\b(new\s+line|newline)\b\s*', '\n', transcript, flags=re.I)
     transcript = dictionary.apply(transcript)
     transcript = shortcuts.apply(transcript)
     return {"transcript": transcript}

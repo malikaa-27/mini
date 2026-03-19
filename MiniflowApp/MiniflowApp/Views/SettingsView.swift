@@ -189,6 +189,21 @@ struct SettingsTab: View {
                     Divider().padding(.horizontal, 16)
 
                     settingsRow(
+                        title: "New Line Mode",
+                        subtitle: "Say \"new line\" to move the cursor to the next line (Shift+Return)."
+                    ) {
+                        Toggle("", isOn: $vm.newlineMode)
+                            .labelsHidden()
+                            .toggleStyle(.switch)
+                            .controlSize(.small)
+                            .onChange(of: vm.newlineMode) { enabled in
+                                Task { await vm.saveNewlineMode(enabled) }
+                            }
+                    }
+
+                    Divider().padding(.horizontal, 16)
+
+                    settingsRow(
                         title: "Accessibility Permission",
                         subtitle: "Required for MiniFlow to type into other apps."
                     ) {

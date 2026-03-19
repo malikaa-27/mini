@@ -32,6 +32,7 @@ DEFAULT_SETTINGS = {
     "developer_mode": False,
     "filler_removal": True,
     "numeral_mode": False,
+    "newline_mode": False,
     "user_name": None,
 }
 
@@ -102,11 +103,12 @@ def get_advanced_settings() -> dict:
         "developer_mode": s["developer_mode"],
         "filler_removal": s["filler_removal"],
         "numeral_mode": s.get("numeral_mode", False),
+        "newline_mode": s.get("newline_mode", False),
     }
 
 def save_advanced_setting(key: str, value: bool):
     s = _read_settings()
-    if key not in ("whisper_mode", "developer_mode", "filler_removal", "numeral_mode"):
+    if key not in ("whisper_mode", "developer_mode", "filler_removal", "numeral_mode", "newline_mode"):
         raise ValueError(f"Unknown setting: {key}")
     s[key] = value
     _write_settings(s)
