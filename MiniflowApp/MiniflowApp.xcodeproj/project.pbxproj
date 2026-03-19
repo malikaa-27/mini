@@ -226,7 +226,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd \"$SRCROOT/../miniflow-engine\"\npython3 -m pytest test_dictionary.py test_shortcuts.py test_dictation.py -v\n";
+			shellScript = "export PATH=\"/opt/homebrew/bin:/opt/homebrew/opt/python@3.14/bin:$PATH\"\ncd \"$SRCROOT/../miniflow-engine\"\npython3 -m pytest test_dictionary.py test_shortcuts.py test_dictation.py -v\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
