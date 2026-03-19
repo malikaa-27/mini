@@ -623,3 +623,46 @@ class TestTypeText:
         calls = mock_quartz.CGEventCreateKeyboardEvent.call_args_list
         assert calls[0][0][2] is True   # key down
         assert calls[1][0][2] is False  # key up
+
+
+# ── Newline substitution logic (inlined from main.py) ─────────────────────────
+
+import re as _re
+
+
+def _apply_newline_mode(transcript: str) -> str:
+    """Mirror of the newline_mode block in main._transcribe_audio."""
+    transcript = _re.sub(
+        r'(\.)[ \t]*\b(?:new\s+line|newline)\b[ \t]*([a-zA-Z])',
+        lambda m: m.group(1) + '\n' + m.group(2).upper(),
+        transcript, flags=_re.I,
+    )
+    transcript = _re.sub(r'[ \t]*\b(?:new\s+line|newline)\b[ \t]*', '\n', transcript, flags=_re.I)
+    return transcript
+
+
+class TestNewlineSubstitution:
+    def test_101_after_full_stop_capitalises(self):
+        assert _apply_newline_mode("Hello world. new line this is fine") == "Hello world.\nThis is fine"
+
+    def test_102_no_full_stop_no_capitalise(self):
+        assert _apply_newline_mode("Hello world new line this is fine") == "Hello world\nthis is fine"
+
+    def test_103_newline_keyword_variant(self):
+        assert _apply_newline_mode("Done. newline next thought") == "Done.\nNext thought"
+
+    def test_104_no_full_stop_newline_variant(self):
+        assert _apply_newline_mode("Done newline next thought") == "Done\nnext thought"
+
+    def test_105_multiple_new_lines_mixed(self):
+        result = _apply_newline_mode("First sentence. new line second sentence new line third")
+        assert result == "First sentence.\nSecond sentence\nthird"
+
+    def test_106_end_of_string_no_following_word(self):
+        assert _apply_newline_mode("Hello. new line") == "Hello.\n"
+
+    def test_107_end_of_string_no_period(self):
+        assert _apply_newline_mode("Hello new line") == "Hello\n"
+
+    def test_108_case_insensitive_trigger(self):
+        assert _apply_newline_mode("Hi. New Line there") == "Hi.\nThere"

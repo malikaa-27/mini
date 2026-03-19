@@ -179,7 +179,14 @@ async def _transcribe_audio(b: dict):
     if settings.get("numeral_mode"):
         transcript = _convert_numerals(transcript)
     if settings.get("newline_mode"):
-        transcript = re.sub(r'\s*\b(new\s+line|newline)\b\s*', '\n', transcript, flags=re.I)
+        # After a full stop: insert \n and capitalise the first letter of the next word
+        transcript = re.sub(
+            r'(\.)[ \t]*\b(?:new\s+line|newline)\b[ \t]*([a-zA-Z])',
+            lambda m: m.group(1) + '\n' + m.group(2).upper(),
+            transcript, flags=re.I,
+        )
+        # No full stop before: just insert \n, no capitalisation
+        transcript = re.sub(r'[ \t]*\b(?:new\s+line|newline)\b[ \t]*', '\n', transcript, flags=re.I)
     transcript = dictionary.apply(transcript)
     transcript = shortcuts.apply(transcript)
     return {"transcript": transcript}
