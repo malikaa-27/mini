@@ -30,6 +30,7 @@
 		BCF5F2BA2F5FDBF000630702 /* DictionaryTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF5F2B02F5FDBF000630702 /* DictionaryTab.swift */; };
 		BCF5F2BC2F5FDBFB00630702 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF5F2BB2F5FDBFB00630702 /* Color+Hex.swift */; };
 		BCF5F2BD2F5FDBFB00630702 /* GeistPixel-Square.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BCF5F2BE2F5FDBFB00630702 /* GeistPixel-Square.ttf */; };
+		BCF5F2D12F5FDBFB00630702 /* Geist-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BCF5F2D22F5FDBFB00630702 /* Geist-Regular.ttf */; };
 		BCF5F2BF2F5FDBFB00630702 /* PlaceholderTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF5F2C02F5FDBFB00630702 /* PlaceholderTab.swift */; };
 /* End PBXBuildFile section */
 
@@ -60,6 +61,7 @@
 		BCF5F2B42F5FDBF000630702 /* ShortcutsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ShortcutsTab.swift; path = "Views/ShortcutsTab.swift"; sourceTree = "<group>"; };
 		BCF5F2BB2F5FDBFB00630702 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Color+Hex.swift"; path = "Extensions/Color+Hex.swift"; sourceTree = "<group>"; };
 		BCF5F2BE2F5FDBFB00630702 /* GeistPixel-Square.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "GeistPixel-Square.ttf"; path = "Fonts/GeistPixel-Square.ttf"; sourceTree = "<group>"; };
+		BCF5F2D22F5FDBFB00630702 /* Geist-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Geist-Regular.ttf"; path = "Fonts/Geist-Regular.ttf"; sourceTree = "<group>"; };
 		BCF5F2C02F5FDBFB00630702 /* PlaceholderTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PlaceholderTab.swift; path = "Views/PlaceholderTab.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -94,6 +96,7 @@
 				BCF5F2B32F5FDBF000630702 /* SidebarView.swift */,
 				BCF5F2B42F5FDBF000630702 /* ShortcutsTab.swift */,
 				BCF5F2BE2F5FDBFB00630702 /* GeistPixel-Square.ttf */,
+				BCF5F2D22F5FDBFB00630702 /* Geist-Regular.ttf */,
 				BCF5F2AD2F5FBF7000630702 /* HotkeyManager.swift */,
 				AA0000000000000000000201 /* MiniflowApp.swift */,
 				AA0000000000000000000202 /* AppDelegate.swift */,
@@ -236,6 +239,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BCF5F2BD2F5FDBFB00630702 /* GeistPixel-Square.ttf in Resources */,
+				BCF5F2D12F5FDBFB00630702 /* Geist-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

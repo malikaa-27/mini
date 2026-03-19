@@ -212,7 +212,7 @@ private struct HistoryRow: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(entry.transcript)
-                    .font(.system(size: 13, weight: .regular))
+                    .font(.custom("Geist-Regular", size: 13))
                     .foregroundStyle(Color.black)
                     .lineLimit(2)
 
