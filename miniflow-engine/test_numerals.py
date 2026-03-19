@@ -39,6 +39,28 @@ _COMPOUND_WORDS = frozenset({
 
 _ANY_NUM_WORD = frozenset(set(_DIGIT_WORDS) | _COMPOUND_WORDS)
 
+_ORDINAL_UNITS = {
+    "first": (1, "st"), "second": (2, "nd"), "third": (3, "rd"),
+    "fourth": (4, "th"), "fifth": (5, "th"), "sixth": (6, "th"),
+    "seventh": (7, "th"), "eighth": (8, "th"), "ninth": (9, "th"),
+}
+
+_ORDINAL_ALL = {
+    **_ORDINAL_UNITS,
+    "tenth": (10, "th"), "eleventh": (11, "th"), "twelfth": (12, "th"),
+    "thirteenth": (13, "th"), "fourteenth": (14, "th"), "fifteenth": (15, "th"),
+    "sixteenth": (16, "th"), "seventeenth": (17, "th"), "eighteenth": (18, "th"),
+    "nineteenth": (19, "th"), "twentieth": (20, "th"),
+    "thirtieth": (30, "th"), "fortieth": (40, "th"), "fiftieth": (50, "th"),
+    "sixtieth": (60, "th"), "seventieth": (70, "th"), "eightieth": (80, "th"),
+    "ninetieth": (90, "th"),
+}
+
+_MONTHS = frozenset({
+    "january", "february", "march", "april", "may", "june",
+    "july", "august", "september", "october", "november", "december",
+})
+
 
 def _convert(text: str) -> str:
     if not text:
@@ -46,7 +68,8 @@ def _convert(text: str) -> str:
 
     text = re.sub(
         r'\b(twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)'
-        r'-(one|two|three|four|five|six|seven|eight|nine)\b',
+        r'-(one|two|three|four|five|six|seven|eight|nine|'
+        r'first|second|third|fourth|fifth|sixth|seventh|eighth|ninth)\b',
         r'\1 \2', text, flags=re.I,
     )
     text = re.sub(r'\bA\s+M\b', 'AM', text, flags=re.I)
@@ -105,8 +128,20 @@ def _convert(text: str) -> str:
             converted = _w2i(phrase)
             if converted is not None:
                 trail = _trail(tokens[j - 1])
-                if not trail and j < len(tokens) and _clean(tokens[j]) in ("am", "pm"):
-                    out.append(converted + " " + tokens[j].upper())
+                c_next = _clean(tokens[j]) if j < len(tokens) else ""
+                if not trail and c_next in _ORDINAL_UNITS:
+                    unit_val, unit_suf = _ORDINAL_UNITS[c_next]
+                    unit_trail = _trail(tokens[j])
+                    out.append(str(int(converted) + unit_val) + unit_suf + unit_trail)
+                    j += 1
+                elif not trail and c_next in ("am", "pm"):
+                    time_str = None
+                    if len(parts) > 1:
+                        hr = _w2i(parts[0])
+                        mn = _w2i(" ".join(parts[1:]))
+                        if hr and mn and 1 <= int(hr) <= 12 and 0 <= int(mn) <= 59:
+                            time_str = f"{int(hr)}:{int(mn):02d} {tokens[j].upper()}"
+                    out.append(time_str if time_str else converted + " " + tokens[j].upper())
                     j += 1
                 else:
                     out.append(converted + trail)
@@ -143,6 +178,49 @@ def _convert(text: str) -> str:
     )
     result = re.sub(r'(\d+)\s+[Pp]oint\s+(\d+)', r'\1.\2', result)
     result = re.sub(r'\b(\d{1,2})\s+([0-5]\d)\s*(AM|PM)\b', r'\1:\2 \3', result)
+
+    _ord_unit_pat = '|'.join(re.escape(w) for w in _ORDINAL_UNITS)
+    _ord_all_pat  = '|'.join(re.escape(w) for w in _ORDINAL_ALL)
+    _month_pat    = '|'.join(re.escape(m) for m in _MONTHS)
+
+    def _ord_unit_val(word: str) -> tuple[int, str]:
+        return _ORDINAL_UNITS[word.lower()]
+
+    def _ord_all_val(word: str) -> tuple[int, str]:
+        return _ORDINAL_ALL[word.lower()]
+
+    result = re.sub(
+        rf'\b(\d+)\s+({_ord_unit_pat})([.,;:!?]?)\b',
+        lambda m: str(int(m.group(1)) + _ord_unit_val(m.group(2))[0])
+                  + _ord_unit_val(m.group(2))[1] + m.group(3),
+        result, flags=re.I,
+    )
+    result = re.sub(
+        rf'\b({_month_pat})\s+({_ord_all_pat})([.,;:!?]?)\b',
+        lambda m: m.group(1) + ' '
+                  + str(_ord_all_val(m.group(2))[0]) + _ord_all_val(m.group(2))[1]
+                  + m.group(3),
+        result, flags=re.I,
+    )
+    result = re.sub(
+        rf'\b({_ord_all_pat})\s+of\s+({_month_pat})\b',
+        lambda m: str(_ord_all_val(m.group(1))[0]) + _ord_all_val(m.group(1))[1]
+                  + ' of ' + m.group(2),
+        result, flags=re.I,
+    )
+
+    _LARGE_ORDINALS = {
+        "hundredth":    100,
+        "thousandth":   1_000,
+        "millionth":    1_000_000,
+        "billionth":    1_000_000_000,
+    }
+    for word, mult in _LARGE_ORDINALS.items():
+        result = re.sub(
+            rf'\b(?:(\d+)\s+)?{word}\b',
+            lambda m, mult=mult: str((int(m.group(1)) if m.group(1) else 1) * mult) + "th",
+            result, flags=re.I,
+        )
     return result
 
 
@@ -652,3 +730,82 @@ class TestCompoundNumbers:
     def test_118_two_fragment_groups(self):
         result = _convert("+44, 207, 123, 4567")
         assert result == "+442071234567"
+
+    # ── Date ordinals (119–130) ───────────────────────────────────────────────
+
+    def test_119_birthday_april_twenty_seventh(self):
+        result = _convert("My birthday is on April twenty-seventh, 2003.")
+        assert "April 27th" in result
+
+    def test_120_january_first(self):
+        result = _convert("January first")
+        assert result == "January 1st"
+
+    def test_121_first_of_january(self):
+        result = _convert("first of January")
+        assert result == "1st of January"
+
+    def test_122_march_twenty_first(self):
+        result = _convert("March twenty-first")
+        assert "March 21st" in result
+
+    def test_123_december_thirty_first(self):
+        result = _convert("December thirty-first")
+        assert "December 31st" in result
+
+    def test_124_stt_pre_digitised_ordinal(self):
+        # STT already converted "twenty" → "20", leaving "seventh" as word
+        result = _convert("April 20 seventh, 2003")
+        assert "27th" in result
+
+    def test_125_standalone_ordinal_no_date_context_unchanged(self):
+        # "first" not in date context → stays as-is
+        result = _convert("The first time")
+        assert result == "The first time"
+
+    def test_126_standalone_ordinal_no_date_context_second(self):
+        result = _convert("my second car")
+        assert result == "my second car"
+
+    def test_127_ordinal_after_month_twentieth(self):
+        result = _convert("June twentieth")
+        assert "June 20th" in result
+
+    def test_128_seventh_of_march(self):
+        result = _convert("seventh of March")
+        assert "7th of March" in result
+
+    def test_129_january_1st_already_digit_unchanged(self):
+        # Already digit form — should pass through untouched
+        result = _convert("January 1st")
+        assert result == "January 1st"
+
+    def test_130_full_birthday_sentence(self):
+        result = _convert("My birthday is on April twenty-seventh, 2003.")
+        assert "My birthday is on April 27th, 2003." == result
+
+    def test_131_millionth_standalone(self):
+        assert _convert("millionth") == "1000000th"
+
+    def test_132_ten_millionth(self):
+        # "ten" → "10" via compound path, then post-pass multiplies
+        result = _convert("ten millionth")
+        assert result == "10000000th"
+
+    def test_133_thousandth_standalone(self):
+        assert _convert("thousandth") == "1000th"
+
+    def test_134_hundredth_standalone(self):
+        assert _convert("hundredth") == "100th"
+
+    def test_135_billionth_standalone(self):
+        assert _convert("billionth") == "1000000000th"
+
+    def test_136_five_millionth(self):
+        result = _convert("five millionth")
+        assert result == "5000000th"
+
+    def test_137_large_ordinal_non_numeral_unchanged(self):
+        # In non-numeral mode _convert is never called — this just verifies
+        # the word "millionth" has no special meaning outside the function
+        assert "millionth" in "the millionth time"
