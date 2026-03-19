@@ -226,7 +226,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd \"$SRCROOT/../miniflow-engine\"\nPYTHON=$(which python3 || which python)\nif [ -z \"$PYTHON\" ]; then echo \"error: python3 not found\"; exit 1; fi\n$PYTHON -m pip install pytest --quiet --break-system-packages 2>/dev/null || $PYTHON -m pip install pytest --quiet 2>/dev/null || true\n$PYTHON -m pytest test_dictionary.py test_shortcuts.py test_dictation.py -v\n";
+			shellScript = "cd \"$SRCROOT/../miniflow-engine\"\nPYTHON=$(which python3 || which python)\nif [ -z \"$PYTHON\" ]; then echo \"error: python3 not found\"; exit 1; fi\n$PYTHON -m pip install pytest --quiet --break-system-packages 2>/dev/null || $PYTHON -m pip install pytest --quiet 2>/dev/null || true\n$PYTHON -m pytest test_dictionary.py test_shortcuts.py test_dictation.py test_config.py test_history.py test_filler.py test_dictation_quality.py -v\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

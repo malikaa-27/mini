@@ -207,7 +207,7 @@ class TestApplySpecialChars:
 class TestApplyMultipleMappings:
     def test_51_three_mappings_all_applied(self):
         result = _apply({"a": "1", "b": "2", "c": "3"}, "a b c")
-        assert "1" in result and "2" in result and "3" not in result
+        assert "1" in result and "2" in result and "3" in result
 
     def test_52_ten_mappings(self):
         m = {chr(ord('a') + i): str(i) for i in range(10)}
