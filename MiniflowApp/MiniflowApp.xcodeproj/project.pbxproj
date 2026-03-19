@@ -162,6 +162,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AA0000000000000000000602 /* Build configuration list for PBXNativeTarget "MiniflowApp" */;
 			buildPhases = (
+				BCF5F2C32F5FDBFB00630702 /* Run Python Tests */,
 				AA0000000000000000000401 /* Sources */,
 				AA0000000000000000000402 /* Frameworks */,
 				AA0000000000000000000403 /* Resources */,
@@ -207,6 +208,27 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		BCF5F2C32F5FDBFB00630702 /* Run Python Tests */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Run Python Tests";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd \"$SRCROOT/../miniflow-engine\"\npython3 -m pytest test_dictionary.py test_shortcuts.py test_dictation.py -v\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXResourcesBuildPhase section */
 		AA0000000000000000000403 /* Resources */ = {
