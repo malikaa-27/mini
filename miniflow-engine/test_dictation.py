@@ -592,7 +592,8 @@ class TestTypeText:
         mock_quartz = self._mock_quartz()
         with patch.dict("sys.modules", {"Quartz": mock_quartz}):
             dictation.type_text("line1\nline2")
-        assert mock_quartz.CGEventPost.call_count == 2
+        # 2 calls for "line1" (down+up) + 2 for Shift+Return (down+up) + 2 for "line2" (down+up)
+        assert mock_quartz.CGEventPost.call_count == 6
 
     def test_97_does_not_modify_active_state(self):
         mock_quartz = self._mock_quartz()
