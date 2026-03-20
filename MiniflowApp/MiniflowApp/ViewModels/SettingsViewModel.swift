@@ -10,6 +10,8 @@ final class SettingsViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var saveStatus: String?
     @Published var removeFillerWords = true
+    @Published var numeralMode = false
+    @Published var newlineMode = false
 
     private let api = APIClient.shared
     init() {}
@@ -28,6 +30,8 @@ final class SettingsViewModel: ObservableObject {
         }
         if let settings: AdvancedSettings = try? await api.invoke("get_advanced_settings") {
             removeFillerWords = settings.fillerRemoval
+            numeralMode = settings.numeralMode
+            newlineMode = settings.newlineMode
         }
     }
 
@@ -53,6 +57,16 @@ final class SettingsViewModel: ObservableObject {
         try? await api.invokeVoid("save_advanced_setting", body: ["key": "filler_removal", "value": enabled])
     }
 
+    // MARK: - Numeral mode
+
+    func saveNumeralMode(_ enabled: Bool) async {
+        try? await api.invokeVoid("save_advanced_setting", body: ["key": "numeral_mode", "value": enabled])
+    }
+
+    func saveNewlineMode(_ enabled: Bool) async {
+        try? await api.invokeVoid("save_advanced_setting", body: ["key": "newline_mode", "value": enabled])
+    }
+
     // MARK: - Helpers
 
     private func flashStatus(_ message: String) {
@@ -69,5 +83,7 @@ final class SettingsViewModel: ObservableObject {
 
     private struct AdvancedSettings: Decodable {
         let fillerRemoval: Bool
+        let numeralMode: Bool
+        let newlineMode: Bool
     }
 }

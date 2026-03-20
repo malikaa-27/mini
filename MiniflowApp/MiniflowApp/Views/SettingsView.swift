@@ -65,11 +65,6 @@ struct SettingsTab: View {
 
     private var apiKeysSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            infoCard(
-                title: "Connect your speech engine",
-                body: "Add your Smallest AI key to enable real-time voice transcription."
-            )
-
             settingsCard {
                 VStack(alignment: .leading, spacing: 12) {
                     sectionLabel("Smallest AI")
@@ -94,11 +89,6 @@ struct SettingsTab: View {
 
     private var profileSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            infoCard(
-                title: "Your profile",
-                body: "Your name is used to personalise dictated emails, messages, and AI responses."
-            )
-
             settingsCard {
                 VStack(alignment: .leading, spacing: 12) {
                     sectionLabel("Display Name")
@@ -132,11 +122,6 @@ struct SettingsTab: View {
 
     private var generalSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            infoCard(
-                title: "App preferences",
-                body: "Control how MiniFlow behaves on your Mac."
-            )
-
             settingsCard {
                 VStack(alignment: .leading, spacing: 0) {
                     if #available(macOS 13, *) {
@@ -168,6 +153,21 @@ struct SettingsTab: View {
                             .controlSize(.small)
                             .onChange(of: vm.removeFillerWords) { enabled in
                                 Task { await vm.saveRemoveFillerWords(enabled) }
+                            }
+                    }
+
+                    Divider().padding(.horizontal, 16)
+
+                    settingsRow(
+                        title: "New Line Mode",
+                        subtitle: "Say \"new line\" to move the cursor to the next line (Shift+Return)."
+                    ) {
+                        Toggle("", isOn: $vm.newlineMode)
+                            .labelsHidden()
+                            .toggleStyle(.switch)
+                            .controlSize(.small)
+                            .onChange(of: vm.newlineMode) { enabled in
+                                Task { await vm.saveNewlineMode(enabled) }
                             }
                     }
 
@@ -267,7 +267,7 @@ struct SettingsTab: View {
             Group {
                 switch state {
                 case .saving: ProgressView().controlSize(.small)
-                case .saved:  Label("Saved", systemImage: "checkmark").foregroundStyle(Color.fnBadgeBg)
+                case .saved:  Label("Saved", systemImage: "checkmark")
                 case .error:  Label("Error", systemImage: "xmark.circle").foregroundStyle(Color.errorRed)
                 case .idle:   Text("Save")
                 }

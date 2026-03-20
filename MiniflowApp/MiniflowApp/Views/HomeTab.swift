@@ -58,7 +58,7 @@ struct HomeTab: View {
                     // Title row: Hold [Fn] to start dictating
                     HStack(spacing: 0) {
                         Text("Hold ")
-                            .font(.system(size: 17, weight: .semibold))
+                            .font(.custom("GeistPixel-Square", size: 17))
                             .foregroundStyle(Color.black)
                         Text("Fn")
                             .font(.system(size: 12, weight: .semibold))
@@ -68,12 +68,12 @@ struct HomeTab: View {
                             .background(Color.fnBadgeBg)
                             .clipShape(RoundedRectangle(cornerRadius: 7))
                         Text(" to start dictating")
-                            .font(.system(size: 17, weight: .semibold))
+                            .font(.custom("GeistPixel-Square", size: 17))
                             .foregroundStyle(Color.black)
                     }
 
                     Text("Speak naturally  –  MiniFlow transcribes and executes your voice commands in any app")
-                        .font(.system(size: 13))
+                        .font(.system(size: 13, weight: .regular))
                         .foregroundStyle(Color.textMuted)
                 }
                 .padding(.horizontal, 20)
@@ -155,7 +155,7 @@ struct HomeTab: View {
                         ForEach(Array(group.entries.enumerated()), id: \.element.id) { idx, entry in
                             HistoryRow(entry: entry)
                             if idx < group.entries.count - 1 {
-                                Divider().padding(.leading, 90)
+                                Divider()
                             }
                         }
                     }
@@ -213,7 +213,7 @@ private struct HistoryRow: View {
                 Text(entry.transcript)
                     .font(.system(size: 13))
                     .foregroundStyle(Color.black)
-                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 if !entry.actions.isEmpty {
                     HStack(spacing: 6) {
@@ -253,3 +253,4 @@ private struct HistoryRow: View {
         return fmt.string(from: date)
     }
 }
+

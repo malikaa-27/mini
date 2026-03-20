@@ -29,6 +29,9 @@ final class AgentViewModel: ObservableObject {
     private var accessibilityTimer: Timer?
     private var targetBundleID: String?
     private var listeningStartTime: Date?
+    private var keyReleaseTime: Date?
+    private var lastAudioLengthSecs: Double = 0
+    private var lastSttMs: Int = 0
     private let defaultFillerWords = ["um", "uh", "erm", "er", "ah", "uhh", "umm", "uhm"]
 
     init() {
@@ -74,9 +77,14 @@ final class AgentViewModel: ObservableObject {
     }
 
     private func recomputeStats() {
-        totalWordsTranscribed = history.reduce(0) { acc, entry in
-            acc + entry.transcript.split(separator: " ").count
+        // Seed from history if the UserDefaults key has never been written
+        if UserDefaults.standard.object(forKey: "mf_total_words_ever") == nil && !history.isEmpty {
+            let historyCount = history.reduce(0) { acc, entry in
+                acc + entry.transcript.split(separator: " ").count
+            }
+            UserDefaults.standard.set(historyCount, forKey: "mf_total_words_ever")
         }
+        totalWordsTranscribed = UserDefaults.standard.integer(forKey: "mf_total_words_ever")
         let totalSeconds = UserDefaults.standard.double(forKey: "mf_total_speaking_seconds")
         if totalSeconds > 0 && totalWordsTranscribed > 0 {
             averageWpm = Int(Double(totalWordsTranscribed) / totalSeconds * 60.0)
@@ -138,17 +146,30 @@ final class AgentViewModel: ObservableObject {
     func stopListening() async {
         guard isListening else { return }
         isListening = false
+        keyReleaseTime = Date()
 
         let wavData = audio.stopCaptureAndGetWav()
         guard !wavData.isEmpty else { return }
 
+        if let start = listeningStartTime, let release = keyReleaseTime {
+            lastAudioLengthSecs = release.timeIntervalSince(start)
+        }
+
         do {
             var body: [String: Any] = ["audio": wavData.base64EncodedString()]
             if let bundleID = targetBundleID { body["bundleID"] = bundleID }
+            let sttStart = Date()
             let result: [String: String] = try await api.invoke("transcribe_audio", body: body)
+            lastSttMs = Int(Date().timeIntervalSince(sttStart) * 1000)
             let fullText = (result["transcript"] ?? "").trimmingCharacters(in: .whitespaces)
             transcript = fullText
             if !fullText.isEmpty {
+                // Accumulate word count (never resets on Clear All)
+                let wordCount = fullText.split(separator: " ").count
+                let prevWords = UserDefaults.standard.integer(forKey: "mf_total_words_ever")
+                UserDefaults.standard.set(prevWords + wordCount, forKey: "mf_total_words_ever")
+                totalWordsTranscribed = prevWords + wordCount
+
                 // Accumulate speaking time for WPM calculation
                 if let start = listeningStartTime {
                     let duration = max(Date().timeIntervalSince(start), 1.0)
@@ -264,6 +285,14 @@ final class AgentViewModel: ObservableObject {
             }
 
             await typeTextLocally(text)
+            let totalMs = keyReleaseTime.map { Int(Date().timeIntervalSince($0) * 1000) } ?? 0
+            axLog("""
+            ┌─ LATENCY SUMMARY ──────────────────────────
+            │  Audio length   : \(String(format: "%.2f", lastAudioLengthSecs))s
+            │  STT (Smallest) : \(lastSttMs)ms
+            │  Fn release → screen : \(totalMs)ms
+            └────────────────────────────────────────────
+            """)
             axLog("handleLocalDictation: typed via CGEvent")
             return
         }

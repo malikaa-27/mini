@@ -118,8 +118,8 @@ async def _activate_target_app():
         )
         if result.returncode != 0:
             log.warning(f"_activate_target_app: osascript exited {result.returncode}: {result.stderr.decode().strip()}")
-        # Wait for focus to settle — 300ms is enough for most apps including Electron/browsers
-        await asyncio.sleep(0.30)
+        # Wait for focus to settle — 50ms minimum before injecting keystrokes
+        await asyncio.sleep(0.05)
         log.info("_activate_target_app: focus settled, ready to type")
     except Exception as e:
         log.warning(f"_activate_target_app: {e}")
@@ -244,85 +244,10 @@ def _inject_file_context(text: str) -> str:
 async def execute_command(text: str) -> list[dict]:
     await _emit("agent-status", "processing")
 
-    try:
-        openai_key = config.get_openai_key()
-    except ValueError:
-        # No OpenAI key — delegate dictation typing to Swift app process.
-        log.info(f"No OpenAI key set, emitting dictation action: '{text[:60]}'")
-        result = [{"action": "dictation", "success": True, "message": text}]
-        await _emit("action-result", {"action": "dictation", "success": True, "message": text})
-        history.append_entry(transcript=text, entry_type="dictation", actions=result, success=True)
-        await _emit("agent-status", "idle")
-        return result
-
-    client = AsyncOpenAI(api_key=openai_key)
-    user_name = config.get_user_name()
-    today = datetime.now().strftime("%A, %B %d, %Y")
-
-    user_msg = _inject_file_context(text)
-    if user_name:
-        user_msg = f"[User name: {user_name}]\n[Today: {today}]\n{user_msg}"
-    else:
-        user_msg = f"[Today: {today}]\n{user_msg}"
-
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": user_msg},
-    ]
-
-    # Build tool list: local tools only
-    tools = list(LOCAL_TOOLS)
-
-    action_results = []
-    max_turns = 8
-
-    for _ in range(max_turns):
-        response = await client.chat.completions.create(
-            model="gpt-4o",
-            messages=messages,
-            tools=tools,
-            tool_choice="auto",
-        )
-        msg = response.choices[0].message
-
-        if not msg.tool_calls:
-            # No tool call -> emit dictation action; Swift process performs typing.
-            # We NEVER type GPT's text response, only original transcript.
-            log.info(f"Emitting dictation action: '{text[:60]}'")
-            await _emit("action-result", {"action": "dictation", "success": True, "message": text})
-            action_results.append({"action": "dictation", "success": True, "message": text})
-            break
-
-        messages.append({"role": "assistant", "tool_calls": [
-            {"id": tc.id, "type": "function", "function": {"name": tc.function.name, "arguments": tc.function.arguments}}
-            for tc in msg.tool_calls
-        ]})
-
-        for tc in msg.tool_calls:
-            fn_name = tc.function.name
-            try:
-                args = json.loads(tc.function.arguments)
-            except Exception:
-                args = {}
-
-            # Try local tools only
-            success, result_msg = _execute_local(fn_name, args)
-
-            action_results.append({"action": fn_name, "success": success, "message": result_msg})
-            await _emit("action-result", {"action": fn_name, "success": success, "message": result_msg})
-
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tc.id,
-                "content": result_msg,
-            })
-
-    history.append_entry(
-        transcript=text,
-        entry_type="command" if any(r["action"] != "dictation" for r in action_results) else "dictation",
-        actions=action_results,
-        success=all(r["success"] for r in action_results),
-    )
-
+    # Skip GPT — emit dictation immediately for lowest latency.
+    log.info(f"Emitting dictation action directly: '{text[:60]}'")
+    result = [{"action": "dictation", "success": True, "message": text}]
+    await _emit("action-result", {"action": "dictation", "success": True, "message": text})
+    history.append_entry(transcript=text, entry_type="dictation", actions=result, success=True)
     await _emit("agent-status", "idle")
-    return action_results
+    return result

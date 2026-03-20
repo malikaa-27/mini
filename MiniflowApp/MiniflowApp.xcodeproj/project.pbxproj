@@ -30,6 +30,7 @@
 		BCF5F2BA2F5FDBF000630702 /* DictionaryTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF5F2B02F5FDBF000630702 /* DictionaryTab.swift */; };
 		BCF5F2BC2F5FDBFB00630702 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF5F2BB2F5FDBFB00630702 /* Color+Hex.swift */; };
 		BCF5F2BD2F5FDBFB00630702 /* GeistPixel-Square.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BCF5F2BE2F5FDBFB00630702 /* GeistPixel-Square.ttf */; };
+		BCF5F2D12F5FDBFB00630702 /* Geist-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BCF5F2D22F5FDBFB00630702 /* Geist-Regular.ttf */; };
 		BCF5F2BF2F5FDBFB00630702 /* PlaceholderTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF5F2C02F5FDBFB00630702 /* PlaceholderTab.swift */; };
 /* End PBXBuildFile section */
 
@@ -60,6 +61,7 @@
 		BCF5F2B42F5FDBF000630702 /* ShortcutsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ShortcutsTab.swift; path = "Views/ShortcutsTab.swift"; sourceTree = "<group>"; };
 		BCF5F2BB2F5FDBFB00630702 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Color+Hex.swift"; path = "Extensions/Color+Hex.swift"; sourceTree = "<group>"; };
 		BCF5F2BE2F5FDBFB00630702 /* GeistPixel-Square.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "GeistPixel-Square.ttf"; path = "Fonts/GeistPixel-Square.ttf"; sourceTree = "<group>"; };
+		BCF5F2D22F5FDBFB00630702 /* Geist-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Geist-Regular.ttf"; path = "Fonts/Geist-Regular.ttf"; sourceTree = "<group>"; };
 		BCF5F2C02F5FDBFB00630702 /* PlaceholderTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PlaceholderTab.swift; path = "Views/PlaceholderTab.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -94,6 +96,7 @@
 				BCF5F2B32F5FDBF000630702 /* SidebarView.swift */,
 				BCF5F2B42F5FDBF000630702 /* ShortcutsTab.swift */,
 				BCF5F2BE2F5FDBFB00630702 /* GeistPixel-Square.ttf */,
+				BCF5F2D22F5FDBFB00630702 /* Geist-Regular.ttf */,
 				BCF5F2AD2F5FBF7000630702 /* HotkeyManager.swift */,
 				AA0000000000000000000201 /* MiniflowApp.swift */,
 				AA0000000000000000000202 /* AppDelegate.swift */,
@@ -162,6 +165,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AA0000000000000000000602 /* Build configuration list for PBXNativeTarget "MiniflowApp" */;
 			buildPhases = (
+				BCF5F2C32F5FDBFB00630702 /* Run Python Tests */,
 				AA0000000000000000000401 /* Sources */,
 				AA0000000000000000000402 /* Frameworks */,
 				AA0000000000000000000403 /* Resources */,
@@ -208,12 +212,34 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		BCF5F2C32F5FDBFB00630702 /* Run Python Tests */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Run Python Tests";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd \"$SRCROOT/../miniflow-engine\"\nPYTHON=$(which python3 || which python)\nif [ -z \"$PYTHON\" ]; then echo \"error: python3 not found\"; exit 1; fi\n$PYTHON -m pip install pytest --quiet --break-system-packages 2>/dev/null || $PYTHON -m pip install pytest --quiet 2>/dev/null || true\n$PYTHON -m pytest test_dictionary.py test_shortcuts.py test_dictation.py test_config.py test_history.py test_filler.py test_dictation_quality.py test_numerals.py -v\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXResourcesBuildPhase section */
 		AA0000000000000000000403 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				BCF5F2BD2F5FDBFB00630702 /* GeistPixel-Square.ttf in Resources */,
+				BCF5F2D12F5FDBFB00630702 /* Geist-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
