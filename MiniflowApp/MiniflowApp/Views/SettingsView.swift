@@ -122,11 +122,6 @@ struct SettingsTab: View {
 
     private var generalSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            infoCard(
-                title: "App preferences",
-                body: "Control how MiniFlow behaves on your Mac."
-            )
-
             settingsCard {
                 VStack(alignment: .leading, spacing: 0) {
                     if #available(macOS 13, *) {

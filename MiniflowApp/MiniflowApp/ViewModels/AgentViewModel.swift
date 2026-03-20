@@ -77,6 +77,13 @@ final class AgentViewModel: ObservableObject {
     }
 
     private func recomputeStats() {
+        // Seed from history if the UserDefaults key has never been written
+        if UserDefaults.standard.object(forKey: "mf_total_words_ever") == nil && !history.isEmpty {
+            let historyCount = history.reduce(0) { acc, entry in
+                acc + entry.transcript.split(separator: " ").count
+            }
+            UserDefaults.standard.set(historyCount, forKey: "mf_total_words_ever")
+        }
         totalWordsTranscribed = UserDefaults.standard.integer(forKey: "mf_total_words_ever")
         let totalSeconds = UserDefaults.standard.double(forKey: "mf_total_speaking_seconds")
         if totalSeconds > 0 && totalWordsTranscribed > 0 {
