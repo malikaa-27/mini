@@ -65,11 +65,6 @@ struct SettingsTab: View {
 
     private var apiKeysSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            infoCard(
-                title: "Connect your speech engine",
-                body: "Add your Smallest AI key to enable real-time voice transcription."
-            )
-
             settingsCard {
                 VStack(alignment: .leading, spacing: 12) {
                     sectionLabel("Smallest AI")
@@ -94,11 +89,6 @@ struct SettingsTab: View {
 
     private var profileSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            infoCard(
-                title: "Your profile",
-                body: "Your name is used to personalise dictated emails, messages, and AI responses."
-            )
-
             settingsCard {
                 VStack(alignment: .leading, spacing: 12) {
                     sectionLabel("Display Name")
@@ -168,21 +158,6 @@ struct SettingsTab: View {
                             .controlSize(.small)
                             .onChange(of: vm.removeFillerWords) { enabled in
                                 Task { await vm.saveRemoveFillerWords(enabled) }
-                            }
-                    }
-
-                    Divider().padding(.horizontal, 16)
-
-                    settingsRow(
-                        title: "Numeral Mode",
-                        subtitle: "Converts spoken digits to numbers — \"two five six\" → 256, \"plus one four\" → +14."
-                    ) {
-                        Toggle("", isOn: $vm.numeralMode)
-                            .labelsHidden()
-                            .toggleStyle(.switch)
-                            .controlSize(.small)
-                            .onChange(of: vm.numeralMode) { enabled in
-                                Task { await vm.saveNumeralMode(enabled) }
                             }
                     }
 
@@ -297,7 +272,7 @@ struct SettingsTab: View {
             Group {
                 switch state {
                 case .saving: ProgressView().controlSize(.small)
-                case .saved:  Label("Saved", systemImage: "checkmark").foregroundStyle(Color.fnBadgeBg)
+                case .saved:  Label("Saved", systemImage: "checkmark")
                 case .error:  Label("Error", systemImage: "xmark.circle").foregroundStyle(Color.errorRed)
                 case .idle:   Text("Save")
                 }

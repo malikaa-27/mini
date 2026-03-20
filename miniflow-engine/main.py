@@ -176,8 +176,7 @@ async def _transcribe_audio(b: dict):
     settings = config.get_advanced_settings()
     if settings.get("filler_removal"):
         transcript = _remove_filler_words(transcript, config.get_all_filler_words())
-    if settings.get("numeral_mode"):
-        transcript = _convert_numerals(transcript)
+    transcript = _convert_numerals(transcript)
     if settings.get("newline_mode"):
         # After a full stop: insert \n and capitalise the first letter of the next word
         transcript = re.sub(
