@@ -318,36 +318,31 @@ final class AgentViewModel: ObservableObject {
 
     private func typeTextLocally(_ text: String) async {
         guard !text.isEmpty else { return }
-        guard let source = CGEventSource(stateID: .hidSystemState) else {
+
+        // Save previous clipboard, paste text via Cmd+V, then restore
+        let pasteboard = NSPasteboard.general
+        let previous = pasteboard.string(forType: .string)
+
+        pasteboard.clearContents()
+        pasteboard.setString(text, forType: .string)
+
+        guard let source = CGEventSource(stateID: .hidSystemState),
+              let down = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: true),
+              let up   = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: false) else {
             axLog("typeTextLocally: failed to create CGEventSource")
             return
         }
+        down.flags = .maskCommand
+        up.flags   = .maskCommand
+        down.post(tap: .cghidEventTap)
+        up.post(tap: .cghidEventTap)
 
-        let utf16 = Array(text.utf16)
-        let maxChunk = 10 // smaller chunks = fewer dropped chars
-        var offset = 0
-        var chunkCount = 0
+        // Wait for paste to land then restore previous clipboard
+        try? await Task.sleep(nanoseconds: 150_000_000) // 150ms
+        pasteboard.clearContents()
+        if let previous { pasteboard.setString(previous, forType: .string) }
 
-        while offset < utf16.count {
-            let end = min(offset + maxChunk, utf16.count)
-            let chunk = Array(utf16[offset..<end])
-
-            if let down = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: true),
-               let up = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: false) {
-                chunk.withUnsafeBufferPointer { buf in
-                    guard let base = buf.baseAddress else { return }
-                    down.keyboardSetUnicodeString(stringLength: chunk.count, unicodeString: base)
-                    up.keyboardSetUnicodeString(stringLength: chunk.count, unicodeString: base)
-                }
-                down.post(tap: .cghidEventTap)
-                up.post(tap: .cghidEventTap)
-            }
-            offset = end
-            chunkCount += 1
-            // Small delay between chunks so apps don't drop characters
-            try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
-        }
-        axLog("typeTextLocally: injected \(utf16.count) UTF-16 units in \(chunkCount) chunks")
+        axLog("typeTextLocally: pasted \(text.count) chars via Cmd+V")
     }
 
     private func applyFillerRemovalIfEnabled(_ text: String) async -> String {
