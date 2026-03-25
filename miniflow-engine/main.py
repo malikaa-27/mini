@@ -208,7 +208,6 @@ async def websocket_endpoint(ws: WebSocket):
 async def _stream_session(ws: WebSocket, session_id: str, chunk_queue: asyncio.Queue):
     """Run a full streaming transcription session and send back the formatted result."""
     import time
-    t0 = time.monotonic()
 
     async def on_partial(text: str):
         await ws.send_text(json.dumps({
@@ -223,11 +222,10 @@ async def _stream_session(ws: WebSocket, session_id: str, chunk_queue: asyncio.Q
         log.error(f"Streaming STT failed: {e}")
         transcript = ""
 
-    stt_ms = int((time.monotonic() - t0) * 1000)
     t1 = time.monotonic()
     transcript = format_transcript(transcript)
     fmt_ms = int((time.monotonic() - t1) * 1000)
-    log.info(f"Streaming STT: {stt_ms}ms  |  GPT formatter: {fmt_ms}ms")
+    log.info(f"[LATENCY] Groq formatter: {fmt_ms}ms")
     transcript = dictionary.apply(transcript)
     transcript = shortcuts.apply(transcript)
     if transcript.strip():
@@ -257,7 +255,7 @@ async def _handle_ws_transcribe(ws: WebSocket, msg: dict):
     t1 = time.monotonic()
     transcript = format_transcript(transcript)
     fmt_ms = int((time.monotonic() - t1) * 1000)
-    log.info(f"STT: {stt_ms}ms  |  GPT formatter: {fmt_ms}ms")
+    log.info(f"STT: {stt_ms}ms  |  Groq Formatter: {fmt_ms}ms")
     transcript = dictionary.apply(transcript)
     transcript = shortcuts.apply(transcript)
     if transcript.strip():
@@ -361,7 +359,7 @@ async def _transcribe_audio(b: dict):
     t1 = time.monotonic()
     transcript = format_transcript(transcript)
     fmt_ms = int((time.monotonic() - t1) * 1000)
-    log.info(f"STT: {stt_ms}ms  |  GPT formatter: {fmt_ms}ms")
+    log.info(f"STT: {stt_ms}ms  |  Groq formatter: {fmt_ms}ms")
     transcript = dictionary.apply(transcript)
     transcript = shortcuts.apply(transcript)
     if transcript.strip():

@@ -42,7 +42,10 @@ async def stream_transcribe(
     final_transcript = ""
     last_text = ""
     segments: list[str] = []  # accumulates each finalized segment
+    total_pcm_bytes = 0
     t0 = time.perf_counter()
+    finalize_time = 0.0
+    final_received_time = 0.0
     finalize_sent = asyncio.Event()
 
     # ping_interval keeps connection alive during long recordings (up to ~60s+)
@@ -55,16 +58,19 @@ async def stream_transcribe(
     ) as ws:
 
         async def sender():
+            nonlocal total_pcm_bytes, finalize_time
             while True:
                 chunk = await chunk_queue.get()
                 if chunk is None:  # sentinel — send finalize signal to server
                     await ws.send(json.dumps({"type": "finalize"}))
+                    finalize_time = time.perf_counter()
                     finalize_sent.set()
                     return
+                total_pcm_bytes += len(chunk)
                 await ws.send(chunk)
 
         async def receiver():
-            nonlocal final_transcript, last_text
+            nonlocal final_transcript, last_text, final_received_time
             try:
                 async for raw in ws:
                     log.info(f"WSS response: {str(raw)[:300]}")
@@ -88,10 +94,12 @@ async def stream_transcribe(
                             await on_partial(preview)
                     if is_last:
                         final_transcript = last_text
+                        final_received_time = time.perf_counter()
                         break
                     # Only break on is_final after finalize sent
                     if is_final and finalize_sent.is_set():
                         final_transcript = last_text
+                        final_received_time = time.perf_counter()
                         break
             except websockets.exceptions.ConnectionClosed:
                 pass  # connection closed — fallback to last_text below
@@ -114,8 +122,17 @@ async def stream_transcribe(
         if not final_transcript and last_text:
             final_transcript = last_text
 
-    stt_ms = (time.perf_counter() - t0) * 1000
-    log.info(f"[LATENCY] Streaming STT: {stt_ms:.0f}ms | transcript: '{final_transcript}'")
+    audio_length_s = total_pcm_bytes / 32000  # 16kHz * 16-bit = 32000 bytes/sec
+    finalize_to_final_ms = (final_received_time - finalize_time) * 1000 if final_received_time and finalize_time else 0
+    total_ms = (time.perf_counter() - t0) * 1000
+    log.info(
+        f"[LATENCY] ┌─ WSS STT ─────────────────────────────\n"
+        f"          │  Audio length     : {audio_length_s:.2f}s\n"
+        f"          │  Finalize → final : {finalize_to_final_ms:.0f}ms\n"
+        f"          │  Total session    : {total_ms:.0f}ms\n"
+        f"          │  Transcript       : '{final_transcript[:80]}'\n"
+        f"          └──────────────────────────────────────────"
+    )
     return final_transcript
 
 
