@@ -148,11 +148,24 @@ if [ -n "${APPLE_ID:-}" ] && [ -n "${APPLE_APP_SPECIFIC_PASSWORD:-}" ] && [ -n "
   echo ""
   echo "━━━ Notarizing DMG ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo "→ Submitting to Apple notary service (this may take a few minutes)..."
-  xcrun notarytool submit "$DMG_PATH" \
+  NOTARY_OUTPUT=$(xcrun notarytool submit "$DMG_PATH" \
     --apple-id "$APPLE_ID" \
     --password "$APPLE_APP_SPECIFIC_PASSWORD" \
     --team-id "$APPLE_TEAM_ID" \
-    --wait
+    --wait 2>&1)
+  echo "$NOTARY_OUTPUT"
+  NOTARY_ID=$(echo "$NOTARY_OUTPUT" | grep "^  id:" | head -1 | awk '{print $2}')
+  NOTARY_STATUS=$(echo "$NOTARY_OUTPUT" | grep "^  status:" | awk '{print $2}')
+  if [ "$NOTARY_STATUS" != "Accepted" ]; then
+    echo "✗ Notarization failed (status: $NOTARY_STATUS) — fetching rejection log..."
+    if [ -n "$NOTARY_ID" ]; then
+      xcrun notarytool log "$NOTARY_ID" \
+        --apple-id "$APPLE_ID" \
+        --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+        --team-id "$APPLE_TEAM_ID"
+    fi
+    exit 1
+  fi
   echo "→ Stapling notarization ticket (retrying up to 5x for CDN propagation)..."
   for attempt in 1 2 3 4 5; do
     if xcrun stapler staple "$DMG_PATH"; then
