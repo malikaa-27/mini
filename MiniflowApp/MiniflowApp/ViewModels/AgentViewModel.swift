@@ -50,6 +50,13 @@ final class AgentViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
+        events.$partialTranscript
+            .receive(on: RunLoop.main)
+            .sink { [weak self] partial in
+                if !partial.isEmpty { self?.transcript = partial }
+            }
+            .store(in: &cancellables)
+
         events.$lastActionResult
             .compactMap { $0 }
             .receive(on: RunLoop.main)
@@ -135,6 +142,11 @@ final class AgentViewModel: ObservableObject {
         }
 
         do {
+            // Start streaming session before capture so no chunks are missed
+            events.startTranscription(bundleID: targetBundleID)
+            audio.onChunk = { [weak self] pcm in
+                self?.events.sendAudioChunk(pcm)
+            }
             try audio.startCapture()
         } catch {
             isListening = false
@@ -146,17 +158,19 @@ final class AgentViewModel: ObservableObject {
         guard isListening else { return }
         isListening = false
         keyReleaseTime = Date()
-
-        let wavData = audio.stopCaptureAndGetWav()
-        guard !wavData.isEmpty else { return }
+        audio.onChunk = nil
 
         if let start = listeningStartTime, let release = keyReleaseTime {
             lastAudioLengthSecs = release.timeIntervalSince(start)
         }
 
+        audio.stopCapture()
+
         do {
+            // STT was happening in real-time — stopTranscription just signals end
+            // and waits for the final formatted result (GPT formatter time only)
             let sttStart = Date()
-            let fullText = try await events.transcribe(wavData: wavData, bundleID: targetBundleID)
+            let fullText = try await events.stopTranscription()
                 .trimmingCharacters(in: .whitespaces)
             lastSttMs = Int(Date().timeIntervalSince(sttStart) * 1000)
             transcript = fullText
