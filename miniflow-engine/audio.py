@@ -41,6 +41,7 @@ async def stream_transcribe(
 
     final_transcript = ""
     last_text = ""
+    segments: list[str] = []  # accumulates each finalized segment
     t0 = time.perf_counter()
     finalize_sent = asyncio.Event()
 
@@ -71,18 +72,24 @@ async def stream_transcribe(
                         data = json.loads(raw)
                     except Exception:
                         continue
-                    # full_transcript accumulates all segments; transcript is just the current one
-                    text = data.get("full_transcript") or data.get("transcript") or ""
+                    text = data.get("transcript") or ""
                     is_final = data.get("is_final", False)
                     is_last = data.get("is_last", False)
-                    if text:
-                        last_text = text
+                    if is_final and text:
+                        # Segment finalized — append to accumulation
+                        segments.append(text.strip())
+                        last_text = "".join(segments)
                         if on_partial:
-                            await on_partial(text)
+                            await on_partial(last_text)
+                    elif text and not is_final:
+                        # Partial — show accumulated segments + current partial
+                        preview = "".join(segments) + ("" if segments else "") + text.strip()
+                        if on_partial:
+                            await on_partial(preview)
                     if is_last:
                         final_transcript = last_text
                         break
-                    # Only break on is_final after finalize has been sent (avoids mid-stream cutoff)
+                    # Only break on is_final after finalize sent
                     if is_final and finalize_sent.is_set():
                         final_transcript = last_text
                         break
