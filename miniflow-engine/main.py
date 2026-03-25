@@ -216,8 +216,9 @@ async def _stream_session(ws: WebSocket, session_id: str, chunk_queue: asyncio.Q
             "payload": {"text": text},
         }))
 
+    stt_stats = {}
     try:
-        transcript = await audio.stream_transcribe(chunk_queue, on_partial=on_partial)
+        transcript, stt_stats = await audio.stream_transcribe(chunk_queue, on_partial=on_partial)
     except Exception as e:
         log.error(f"Streaming STT failed: {e}")
         transcript = ""
@@ -225,7 +226,27 @@ async def _stream_session(ws: WebSocket, session_id: str, chunk_queue: asyncio.Q
     t1 = time.monotonic()
     transcript = format_transcript(transcript)
     fmt_ms = int((time.monotonic() - t1) * 1000)
-    log.info(f"[LATENCY] Groq formatter: {fmt_ms}ms")
+
+    audio_s = stt_stats.get("audio_length_s", 0)
+    fn_to_final = stt_stats.get("finalize_to_final_ms", 0)
+    stt_total = stt_stats.get("stt_total_ms", 0)
+    total_ms = stt_total + fmt_ms
+
+    log.info(
+        f"\n"
+        f"┌─────────────────────────────────────────────────┐\n"
+        f"│             LATENCY SUMMARY                     │\n"
+        f"├─────────────────────────────────────────────────┤\n"
+        f"│  Audio length       : {audio_s:>8.2f}s                │\n"
+        f"│  Fn release → STT   : {fn_to_final:>8.0f}ms               │\n"
+        f"│  STT total          : {stt_total:>8.0f}ms               │\n"
+        f"│  Groq formatter     : {fmt_ms:>8}ms               │\n"
+        f"│  Total (Fn → done)  : {total_ms:>8.0f}ms               │\n"
+        f"├─────────────────────────────────────────────────┤\n"
+        f"│  Transcript: {transcript[:35]:<35}│\n"
+        f"└─────────────────────────────────────────────────┘"
+    )
+
     transcript = dictionary.apply(transcript)
     transcript = shortcuts.apply(transcript)
     if transcript.strip():

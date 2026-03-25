@@ -73,7 +73,7 @@ async def stream_transcribe(
             nonlocal final_transcript, last_text, final_received_time
             try:
                 async for raw in ws:
-                    log.info(f"WSS response: {str(raw)[:300]}")
+                    log.debug(f"WSS response: {str(raw)[:300]}")
                     try:
                         data = json.loads(raw)
                     except Exception:
@@ -125,15 +125,12 @@ async def stream_transcribe(
     audio_length_s = total_pcm_bytes / 32000  # 16kHz * 16-bit = 32000 bytes/sec
     finalize_to_final_ms = (final_received_time - finalize_time) * 1000 if final_received_time and finalize_time else 0
     total_ms = (time.perf_counter() - t0) * 1000
-    log.info(
-        f"[LATENCY] ┌─ WSS STT ─────────────────────────────\n"
-        f"          │  Audio length     : {audio_length_s:.2f}s\n"
-        f"          │  Finalize → final : {finalize_to_final_ms:.0f}ms\n"
-        f"          │  Total session    : {total_ms:.0f}ms\n"
-        f"          │  Transcript       : '{final_transcript[:80]}'\n"
-        f"          └──────────────────────────────────────────"
-    )
-    return final_transcript
+
+    return final_transcript, {
+        "audio_length_s": audio_length_s,
+        "finalize_to_final_ms": finalize_to_final_ms,
+        "stt_total_ms": total_ms,
+    }
 
 
 async def transcribe(wav_bytes: bytes) -> str:

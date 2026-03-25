@@ -331,26 +331,24 @@ final class AgentViewModel: ObservableObject {
             return
         }
 
-        // AX failed (e.g. Electron apps) — paste via Cmd+V immediately, no activation wait
-        // The target app still has focus since MiniFlow's pill is non-activating
-        axLog("typeTextLocally: AX failed, falling back to Cmd+V")
+        // AX failed (e.g. Electron apps, WhatsApp, Terminal) — paste via Cmd+V
+        axLog("typeTextLocally: AX failed, falling back to Cmd+V via System Events")
         let pasteboard = NSPasteboard.general
-        let previous = pasteboard.string(forType: .string)
         pasteboard.clearContents()
         pasteboard.setString(text, forType: .string)
 
-        if let source = CGEventSource(stateID: .hidSystemState),
-           let down = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: true),
-           let up   = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: false) {
-            down.flags = .maskCommand
-            up.flags   = .maskCommand
-            down.post(tap: .cghidEventTap)
-            up.post(tap: .cghidEventTap)
+        // Use AppleScript System Events — works universally across all apps
+        // CGEvent.post(tap: .cghidEventTap) doesn't reach WhatsApp, Terminal, etc.
+        let script = NSAppleScript(source: """
+            tell application "System Events" to keystroke "v" using command down
+        """)
+        var error: NSDictionary?
+        script?.executeAndReturnError(&error)
+        if let error = error {
+            axLog("typeTextLocally: AppleScript error: \(error)")
         }
 
-        try? await Task.sleep(nanoseconds: 150_000_000)
-        pasteboard.clearContents()
-        if let previous { pasteboard.setString(previous, forType: .string) }
+        // Leave text on clipboard so user can manually Cmd+V if simulated paste fails
     }
 
     private func insertTextViaAX(_ text: String) -> Bool {
